@@ -57,3 +57,8 @@ typings/
 # dotenv environment variables file
 .env
 
+# dolphin lockfile
+.directory
+
+# yarn
+yarn.lock

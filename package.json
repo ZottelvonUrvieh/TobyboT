@@ -1,0 +1,19 @@
+{
+  "name": "tobebot",
+  "version": "0.0.1",
+  "description": "A general purpose Discord bot that is modular expandable and allows on the fly module reloading.",
+  "scripts": {
+    "start": "node src/bot.js",
+    "lint": "eslint \"src/**\""
+  },
+  "repository": "git@github.com:ZottelvonUrvieh/tobebot.git",
+  "author": "SnoopSySpoonS <benkosmann@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^3.19.0"
+  },
+  "dependencies": {
+    "discord.js": "^11.2.1",
+    "chalk": "^1.1.3"
+  }
+}
