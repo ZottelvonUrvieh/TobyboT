@@ -11,33 +11,35 @@ module.exports = {
      },
 
     // Called when bot logs into Discord. Keep in mind, this may be called multiple times.
-    connect: function () { 
+    connect: function () {
         this.debug(`In connect!`);
     },
 
     // Called when module gets loaded. Keep in mind, this may be called multiple times. (E.g. manually reloading module)
-    module_load: function () { 
+    module_load: function () {
         this.debug(`In module_load!`);
     },
 
     // Called when module gets unloaded. Keep in mind, this may be called multiple times.
-    module_unload: function () { 
+    module_unload: function () {
         this.debug(`In module_unload!`);
     },
 
     // Called when the bot disconnects from Discord - carefull! This might be called less often than connect!
-    disconnect: function () { 
+    disconnect: function () {
         this.debug(`In disconnect!`);
     },
 
     // General configs for the Module
     config: function () {
+        // you can add your own individual settings and variables here if you like
         return {
             name: 'Example Module',
             description: 'Description of the Example Module',
-            permissions: [], // Permissions your module requires (eg. MESSAGE_DELETE)
-            debugMode: false // If true this module is unusable to anyone besides the configured owners
-                             // and shows the debug logs
+            tags: [],           // Some tags for the menu
+            permissions: [],    // Permissions your module requires (eg. MESSAGE_DELETE)
+            debugMode: false,   // weather or not to show the debug messages in the console
+            ownersOnly: false   // If true this module is unusable to anyone besides the configured owners
         };
     }
 }

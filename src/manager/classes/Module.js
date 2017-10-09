@@ -30,13 +30,16 @@ class Module {
                       `\n-> Skipping the module!`);
         }
         this.bot = bot;
-        this.name = loadedData.config().name;
+        this.configs = loadedData.config();
+        for (var property in this.configs) {
+            if (this.configs.hasOwnProperty(property)) {
+                this[property] = this.configs[property];
+            }
+        }
         this.commands = [];
         this.path = path;
         this.commandsPath = require('path').resolve(path, 'commands');
         this.eventsPath = require('path').resolve(path, 'events');
-        this.permissions = loadedData.config().permissions;
-        this.debugMode = loadedData.config().debugMode;
 
         // Called when bot starts, before login into Discord, before the commands get loaded. One time only.
         this.pre_init = loadedData.pre_init;

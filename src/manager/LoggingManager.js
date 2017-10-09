@@ -21,7 +21,7 @@ class LoggingManager {
         );
         bot.log("Starting up the bot...");
         bot.log(`Bot Prefix is set to: '${bot.prefix}'`);
-        bot.coreDebug(`Bot global debug mode is set to: '${bot.debugMode}'`);
+        bot.coreDebug(`Bot debug flags are set to: [${bot.debugFlags.join(', ')}]`);
     }
 
     loggify(symbol, output) {

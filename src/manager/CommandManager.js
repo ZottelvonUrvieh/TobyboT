@@ -192,7 +192,7 @@ class CommandManager {
         let cmd = this.getCommandByName(cmdName);
         if (!cmd) return;
 
-        if ((cmd.debugMode || cmd.mod.debugMode) && this.bot.owners.indexOf(msg.author.id) === -1)
+        if ((cmd.ownersOnly || cmd.mod.ownersOnly) && this.bot.owners.indexOf(msg.author.id) === -1)
             return; // in debug mode and not owner
 
         cmd.run(msg, args);

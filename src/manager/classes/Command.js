@@ -5,16 +5,14 @@ class Command {
         this.mod = mod;
         let fileName = require('path').resolve(filePath);
         delete require.cache[fileName];
-        let commandData = require(fileName);
-        let config = commandData.config;
-        this.name = config.name;
-        this.description = config.description;
-        this.cmd = config.cmd;
-        this.alias = config.alias;
-        this.permissions = config.permissions;
-        this.location = config.location;
-        this.debugMode = config.debugMode;
-        this.run = commandData.run;
+        this.commandData = require(fileName);
+        this.configs = this.commandData.config(bot);
+        for (var property in this.configs) {
+            if (this.configs.hasOwnProperty(property)) {
+                this[property] = this.configs[property];
+            }
+        }
+        this.run = this.commandData.run;
         this.debug = function (output, debugMode) {
             if (bot.debugFlags.indexOf('dependant') !== -1 && (this.debugMode === true || this.mod.debugMode === true))
                 bot.debug(`${this.toString()}: ${output}`);

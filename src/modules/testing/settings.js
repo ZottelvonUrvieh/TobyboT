@@ -30,13 +30,14 @@ module.exports = {
         this.debug(`In disconnect!`);
     },
 
-    // General configs for the Module
     config: function () {
         return {
-            name: 'Testing Module',
-            description: 'Description of the Testing Module',
-            permissions: [], // Permissions your module requires (eg. MESSAGE_DELETE)
-            debugMode: false // This makes it unusable to anyone besides the configured owners
+            name: 'Another Testing Module of the bot',
+            description: 'Description of the Example Module',
+            tags: [],           // Some tags for the menu
+            permissions: [],    // Permissions your module requires (eg. MESSAGE_DELETE)
+            debugMode: false,   // weather or not to show the debug messages in the console
+            ownersOnly: false   // If true this module is unusable to anyone besides the configured owners
         };
     }
 }
