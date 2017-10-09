@@ -7,22 +7,26 @@ class ConfigManager {
 
     parse_config_file() {
         let lines = require('fs').readFileSync('config.cfg').toString().split('\n');
+        function startsWith(text, test) {
+            let r = new RegExp(`^${test}.*=`, `g`);
+            return r.test(text);
+        }
         lines.forEach(function(line) {
             if (line.startsWith('#') || line.length === 0) return;
-            if (line.startsWith('token=')) {
-                this.bot.token = line.split('=')[1];
+            if (startsWith(line, 'token')) {
+                this.bot.token = line.split('=')[1].trim();
             }
-            else if (line.startsWith('owners=')) {
-                this.bot.owners = line.split('=')[1].split(',');
+            else if (startsWith(line, 'owners')) {
+                this.bot.owners = line.split('=')[1].split(',').map(s => s.trim());
             }
-            else if (line.startsWith('prefix=')) {
-                this.bot.prefix = line.split('=')[1];
+            else if (startsWith(line, 'prefix')) {
+                this.bot.prefix = line.split('=')[1].trim();
             }
-            else if (line.startsWith('globalDebugMode=')) {
-                this.bot.debugMode = (line.split('=')[1]);
+            else if (startsWith(line, 'debugFlags')) {
+                this.bot.debugFlags = line.split('=')[1].split(',').map(s => s.trim());
             }
-            else if (line.startsWith('permissions=')) {
-                this.bot.defaultPermissions = line.split('=')[1].split(',');
+            else if (startsWith(line, 'permissions')) {
+                this.bot.defaultPermissions = line.split('=')[1].split(',').map(s => s.trim());
                 if (this.bot.defaultPermissions[0] === '') this.bot.defaultPermissions = [];
             }
         }, this);
@@ -45,18 +49,16 @@ class ConfigManager {
         }
         var fs = require('fs');
         let config = fs.readFileSync('config.cfg').toString();
-        let newConfig = config.replace(/prefix=.*\n/g, `prefix=${prefix}\n`);
-        // console.log(newConfig);
-        
+        let newConfig = config.replace(new RegExp('prefix=.*\n', 'g'), `prefix=${prefix}\n`);
         fs.writeFileSync('config.cfg', newConfig, 'utf8', function (err) {
-            if (err) return console.log(err);
+            if (err) return console.log(err.stack);
         });
         this.bot.prefix = prefix;
         return true;
     }
 
     // TODO: functions for:
-    // 1. DONE changing prefix 
+    // 1. DONE changing prefix
     // 2. adding / removing owners
 }
 

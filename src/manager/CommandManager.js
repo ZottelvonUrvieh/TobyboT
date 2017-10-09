@@ -1,6 +1,6 @@
 const { lstatSync, readdirSync } = require('fs');
 const { join } = require('path');
-const Command = require('../modules/Command.js');
+const Command = require('./classes/Command.js');
 
 class CommandManager {
     constructor(bot) {
@@ -17,45 +17,44 @@ class CommandManager {
     // load all commands of a mod
     loadCommands(mod)  {
         const isJSFile = source => require('path').extname(source) === '.js';
-        const getCommandFiles = source =>        
+        const getCommandFiles = source =>
         readdirSync(source).map(name => {
             if (name.startsWith('_')) return __filename;
             return join(source, name);
         }).filter(isJSFile);
-        
-        getCommandFiles(mod.commandsPath).map(commandFile => this.loadCommand(commandFile, mod));
 
+        getCommandFiles(mod.commandsPath).map(commandFile => this.loadCommand(commandFile, mod));
     }
 
     loadCommand(commandFile, mod) {
         let command = new Command(commandFile, mod, this.bot);
         if (!command) return false;
-        if (this.manageDuplicates(command) === false) 
+        if (this.manageDuplicates(command) === false)
             return false;
         this.bot.coreDebug(`  - ${command}`);
         this.addPermissions(command);
-        this.allCommands.push(command); 
+        this.allCommands.push(command);
         mod.commands.push(command);
         return true;
     }
 
     /**
      * Requires the module that contains the command to be loaded
-     * 
-     * @param {any} commandName 
+     *
+     * @param {any} commandName
      * @memberof CommandManager
      */
     loadCommandByNameAndModuleFolderName(commandName, moduleFolderName) {
         if (this.getCommandByName(commandName)) return false; // command already loaded
         let mod = this.bot.moduleManager.getModuleByFolderName(moduleFolderName);
-        if (!mod) return; 
+        if (!mod) return;
         const isJSFile = source => require('path').extname(source) === '.js';
-        const getCommandFiles = source =>        
+        const getCommandFiles = source =>
         readdirSync(source).map(name => {
             if (name.startsWith('_')) return __filename;
             return join(source, name);
         }).filter(isJSFile);
-        
+
         getCommandFiles(mod.commandsPath).map(commandFile => {
             let tmpCmd = new Command(commandFile, mod, this.bot);
             if (tmpCmd && tmpCmd.callables.indexOf(commandName) !== -1) {
@@ -69,8 +68,8 @@ class CommandManager {
 
     /**
      * Unloads all the commands of a module - not the module itself (for easier reloding purposes)
-     * 
-     * @param {any} mod 
+     *
+     * @param {any} mod
      * @memberof CommandManager
      */
     unloadModuleCommands(mod) {
@@ -82,8 +81,8 @@ class CommandManager {
     unloadCommand(command) {
         if (command === false) return false;
         this.removeUnneededPermissions(command);
-        this.allCommands.splice(this.allCommands.indexOf(command), 1); 
-        command.mod.commands.splice(command.mod.commands.indexOf(command), 1); 
+        this.allCommands.splice(this.allCommands.indexOf(command), 1);
+        command.mod.commands.splice(command.mod.commands.indexOf(command), 1);
         this.bot.coreDebug(`Unloaded ${command}`);
         return true;
     }
@@ -94,30 +93,30 @@ class CommandManager {
 
     reloadCommand(command) {
         return  this.unloadCommand(command) &&
-                this.loadCommand(command.path, command.mod);      
+                this.loadCommand(command.path, command.mod);
     }
 
     reloadCommandByName(commandName) {
         let command = this.getCommandByName(commandName);
         if (command === false) {
-            this.bot.coreDebug(`No command that listens to ${commandName} found.`);   
+            this.bot.coreDebug(`No command that listens to ${commandName} found.`);
             return false;
         }
-        this.bot.coreDebug(`Reloading  ${command}.`);   
-        this.reloadCommand(command);  
+        this.bot.coreDebug(`Reloading  ${command}.`);
+        this.reloadCommand(command);
         return true;
     }
 
     /**
      * This function handles:
-     * 1. What happens if a commands defined 'cmd' in the settings is the same
+     * a) What happens if a commands defined 'cmd' in the settings is the same
      *    as the 'cmd' from another command? -> Command will be rejected -> return false
-     * 2. What happens if a commands defined 'cmd' is alread taken from another
+     * b) What happens if a commands defined 'cmd' is alread taken from another
      *    commands alias? -> remove the alias from that command
-     * 3. What happens if a command defined 'alias' contains a callable ('cmd' + 'alias')
+     * c) What happens if a command defined 'alias' contains a callable ('cmd' + 'alias')
      *    from other commands? -> remove that alias from the inputted command
-     * 
-     * @param {Command} command 
+     *
+     * @param {Command} command
      * @returns {bool} bool if the command is addable to the current commandpool
      * @memberof CommandManager
      */
@@ -160,7 +159,7 @@ class CommandManager {
         });
         if (newPerms.length === 0) return;
         this.bot.permissions = this.bot.permissions.concat(newPerms);
-        this.bot.coreDebug(`      Adding permissions due to ${cmd} settings: ${newPerms}`);        
+        this.bot.coreDebug(`      Adding permissions due to ${cmd} settings: ${newPerms}`);
     }
 
     removeUnneededPermissions(command) {
@@ -169,9 +168,9 @@ class CommandManager {
 
     /**
      * Retuns the command where the cmdName is equal to the cmd or one of the alias of the command false if no match
-     * 
-     * @param {any} cmdName 
-     * @returns 
+     *
+     * @param {any} cmdName
+     * @returns
      * @memberof CommandManager
      */
     getCommandByName(cmdName) {
@@ -188,12 +187,16 @@ class CommandManager {
         if (msg.content.startsWith(this.bot.prefix) === false) return;
 
         const args = msg.content.slice(this.bot.prefix.length).trim().split(/ +/g);
-        const cmdName = args.shift();//.toLowerCase(); maybe want to do this... 
-        
+        const cmdName = args.shift();//.toLowerCase(); maybe want to do this...
+
         let cmd = this.getCommandByName(cmdName);
         if (!cmd) return;
+
+        if ((cmd.debugMode || cmd.mod.debugMode) && this.bot.owners.indexOf(msg.author.id) === -1)
+            return; // in debug mode and not owner
+
         cmd.run(msg, args);
     }
-}   
+}
 
 module.exports = CommandManager;

@@ -1,6 +1,6 @@
 const { lstatSync, readdirSync } = require('fs')
 const { join } = require('path')
-const Module = require('../modules/Module.js');
+const Module = require('./classes/Module.js');
 
 class ModuleManager {
     constructor(bot) {
@@ -16,7 +16,7 @@ class ModuleManager {
             if (name.startsWith('_')) return __filename; // ignore folders and files with leading underscore
             return join(source, name);
         }).filter(isDirectory);
-        
+
         this.bot.coreDebug('Indexing Modules:');
         getDirectories(join(__dirname, '..', 'modules')).map(modFolder => {
             this.loadModule(modFolder);
@@ -44,8 +44,8 @@ class ModuleManager {
     /**
      * This can acutally take either take a module or a command and removes the permissions that
      * are only needed for that module/command
-     * 
-     * @param {Module|Command} mod 
+     *
+     * @param {Module|Command} mod
      * @memberof ModuleManager
      */
     removeUnneededPermissions(mod) {
@@ -73,7 +73,7 @@ class ModuleManager {
     }
 
     unloadModule(modFolder) {
-        mod.module_unload();  
+        mod.module_unload();
     }
 
     connectCalls() {
@@ -83,13 +83,13 @@ class ModuleManager {
     disconnectCalls() {
         this.modules.map(mod => { if (mod.disconnect) mod.disconnect(); });
     }
-    
+
     getModuleByFolderName(modFolderName) {
         for (let i = 0; i < this.modules.length; i++) {
             let mod = this.modules[i];
             if (mod.id === modFolderName) return mod;
         }
     }
-}   
+}
 
 module.exports = ModuleManager;

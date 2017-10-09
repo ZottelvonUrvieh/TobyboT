@@ -2,21 +2,22 @@ class Command {
     constructor(filePath, mod, bot) {
         this.bot = bot;
         this.path = filePath;
-        this.mod = mod; // could be derived out of filePath... or is it better to have to hand the mod?
-                        // also maybe only storeing the modid is enough?
+        this.mod = mod;
         let fileName = require('path').resolve(filePath);
         delete require.cache[fileName];
         let commandData = require(fileName);
-        this.name = commandData.config.name;
-        this.description = commandData.config.description;        
-        this.cmd = commandData.config.cmd;
-        this.alias = commandData.config.alias;
-        this.permissions = commandData.config.permissions;
-        this.location = commandData.config.location;
-        this.debugMode = commandData.config.debugMode;
+        let config = commandData.config;
+        this.name = config.name;
+        this.description = config.description;
+        this.cmd = config.cmd;
+        this.alias = config.alias;
+        this.permissions = config.permissions;
+        this.location = config.location;
+        this.debugMode = config.debugMode;
         this.run = commandData.run;
         this.debug = function (output, debugMode) {
-            bot.debug(`${this.toString()}: ${output}`, debugMode);
+            if (bot.debugFlags.indexOf('dependant') !== -1 && (this.debugMode === true || this.mod.debugMode === true))
+                bot.debug(`${this.toString()}: ${output}`);
         };
         this.log = function (output) {
             bot.log(`${this.toString()}: ${output}`);

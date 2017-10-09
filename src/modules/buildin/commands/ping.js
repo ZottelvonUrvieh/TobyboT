@@ -1,5 +1,6 @@
 module.exports = {
-    run: async function (message, args){
+    run: async function (message, args) {
+        this.debug('stuff');
         let m = await message.channel.send(':thinking: Ping');
         m = await m.edit(`:thinking: Ping...`);
         await m.edit(`:bulb: Pong! My responsiness is about ${m.editedTimestamp - m.createdTimestamp}ms`);
@@ -10,9 +11,9 @@ module.exports = {
         name: 'Ping',
         cmd: 'ping',
         alias: ['pong'],
-        permissions: [], 
+        permissions: [],
         location: 'ALL',
         description: 'Gets feedback about the ping of the bot.',
-        debugMode: false 
+        debugMode: false
     }
 };

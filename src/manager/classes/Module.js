@@ -1,14 +1,15 @@
-// this class is the 
+// this class is the
 class Module {
     constructor(path, bot) {
         this.debug = function (output) {
-            bot.debug(`In ${this.toString()}: ${output}`);
+            if (bot.debugFlags.indexOf('dependant') !== -1 && this.debugMode === true)
+                bot.debug(`In ${this.toString()}: ${output}`);
         };
 
         this.log = function (output) {
             bot.log(`In ${this.toString()}: ${output}`);
         };
-        
+
         this.error = function (output) {
             bot.error(`In ${this.toString()}: ${output}`);
         };
@@ -35,6 +36,7 @@ class Module {
         this.commandsPath = require('path').resolve(path, 'commands');
         this.eventsPath = require('path').resolve(path, 'events');
         this.permissions = loadedData.config().permissions;
+        this.debugMode = loadedData.config().debugMode;
 
         // Called when bot starts, before login into Discord, before the commands get loaded. One time only.
         this.pre_init = loadedData.pre_init;

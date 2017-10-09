@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const discordjs = require('discord.js');
 const ConfigManager = require('./manager/ConfigManager');
 const ModuleManager = require('./manager/ModuleManager');
@@ -18,20 +19,22 @@ bot.dbManager = new DBManager(bot);
 // eve.inject(bot);
 
 bot.on('ready', () => {
-    bot.log("Connected!");
-    bot.moduleManager.connectCalls();
+    bot.log("Successfully logged into Discord!");
     bot.generateInvite(bot.permissions).then(link => {
         bot.log(`Generated bot invite link (permissions: [${bot.permissions}]):`);
-        bot.log(`${link}`);
+        bot.log(`${chalk.underline(link)}`);
     });
+    bot.dbManager.connectDB();
+    bot.moduleManager.connectCalls();
 });
 
 bot.on('disconnect', () => {
+    bot.warn("Disconnected from Discord!");
     bot.moduleManager.disconnectCalls();
 });
 
-bot.on('message', msg => {    
-    if (msg.author.bot) { return; } 
+bot.on('message', msg => {
+    if (msg.author.bot) { return; }
     bot.commandManager.parseCommand(msg);
 });
 
@@ -43,6 +46,6 @@ bot.on("debug", (e) => bot.discordDebug(e));
 // TODO: Let this handle a client manager to handle reconnecting and stuff?
 bot.log('Waiting for bot to log in...');
 bot.login(bot.token).catch(e => {
-    bot.warn('Login failed! Have you edited the config.cfg with your correct token and are you connected to the internet?'); 
+    bot.warn('Login failed! Have you edited the config.cfg with your correct token and are you connected to the internet?');
     bot.error(e.stack);
 });
