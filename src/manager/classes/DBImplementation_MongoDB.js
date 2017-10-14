@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const discordjs = require('discord.js');
 // Use native promises
 mongoose.Promise = global.Promise;
 
@@ -12,7 +11,6 @@ class MongoDBHandler extends DBInterface{
         // These are the required functions that the DBManager wants to have implemented
         // TODO: complete these functions!!
         this.disconnectDB           = function ()                      { };
-        this.getSettings            = function ()                      { };
 
         this.local                  = false;
         this.tables                 = {};
@@ -23,34 +21,26 @@ class MongoDBHandler extends DBInterface{
         this.db = mongoose.connection;
         this.db.on('error', err => this.error(err));
 
-        // Use a table for each category to keep it a bit organized - TODO: maybe add more than just id, key and data?
-        // this.users = this.db.model('user', mongoose.Schema({ id: String, key: Object, data: Object }));
-        // this.guilds = this.db.model('guild', mongoose.Schema({ id: String, key: Object, data: Object }));
-        // this.channels = this.db.model('channel', mongoose.Schema({ id: String, Object: Object, data: Object }));
-        this.getTable({ name: 'user', schemaOptions: { id: String, key: Object, data: Object } });
-        this.getTable({ name: 'guild', schemaOptions: { id: String, key: Object, data: Object } });
-        this.getTable({ name: 'channel', schemaOptions: { id: String, key: Object, data: Object } });
-
         let mongodbHost = 'localhost';
         let mongodbPort = '27017';
         let authenticate = '';
-
-        // TODO: Move these remote settings into a config!
-        // And: Yes I know that you could access my database with me publishing these here
-        //      But eh... if you like to... I don't really care... and by the time anyone reads this
-        //      I have moved this to a config file anyways and changed the authentication...
-        if (this.local === false) {
-            mongodbHost = 'ds113455.mlab.com';
-            mongodbPort = '13455';
-            authenticate = 'admin:sonentergang@';
-        }
-
         let mongodbDatabase = 'tobebot';
 
+        if (this.local === false) {
+            let sets = this.setSettings(require('path').resolve(__dirname, 'mongoDB.conf'));
+            mongodbHost = sets.mongodbHost;
+            mongodbPort = sets.mongodbPort;
+            authenticate = sets.authenticate;
+            mongodbDatabase = sets.mongodbDatabase;
+        }
         // constructed connect string for mongodb server that works no matter if locally hosted or
         // remote as it changes depending on the this.local variable
         this.mongoDBurl = 'mongodb://' + authenticate + mongodbHost + ':' + mongodbPort + '/' + mongodbDatabase;
         this.connectDB();
+    }
+
+    setSettings(file) {
+        return (require(file));
     }
 
     connectDB() {
@@ -73,12 +63,12 @@ class MongoDBHandler extends DBInterface{
         return retTable;
     }
 
-    async getTableRowByKey(table, key) {
+    async getTableRowsByKey(table, key) {
         let tab = this.getTable(table);
-        let db_entry = await tab.findOne(key, function (err, ) {
+        let db_entries = await tab.find(key, function (err, ) {
             if (err) return console.error(err.stack);
         }.bind(this));
-        return db_entry;
+        return db_entries;
     }
 
     async getTableRows(table) {
@@ -90,28 +80,30 @@ class MongoDBHandler extends DBInterface{
     }
 
     async setTableRowByKey(table, key, row) {
-        if (row === null) this.deleteTableRowByKey(table, key);
+        if (row === null) this.deleteTableRowsByKey(table, key);
         let tab = this.getTable(table);
         return tab.findOneAndUpdate(key, row, { upsert: true }, function (err, ) {
             if (err) return this.error(err.stack);
         }.bind(this));
     }
 
-    // eslint-disable-next-line
-    async setTableRows(table, rows) {
-        // Not implemented yet
-    }
-
-    // eslint-disable-next-line
-    async deleteTable(table) {
-        // Not implemented yet
-    }
-
-    async deleteTableRowByKey(table, key) {
+    async insertTableRows(table, rows) {
         let tab = this.getTable(table);
-        tab.findOneAndRemove(key, function (err,) {
+        return tab.insertMany(rows, function (err) {
             if (err) return this.error(err.stack);
-        }).bind(this);
+        }.bind(this));
+    }
+
+    async deleteTable(table) {
+        let tab = this.getTable(table);
+        return tab.collection.drop();
+    }
+
+    async deleteTableRowsByKey(table, key) {
+        let tab = this.getTable(table);
+        return tab.remove(key, function (err,) {
+            if (err) return this.error(err.stack);
+        }.bind(this));
     }
 }
 

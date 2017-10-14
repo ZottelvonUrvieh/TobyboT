@@ -1,6 +1,6 @@
 module.exports = {
     run: async function (message, ) {
-        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES') !== -1) message.delete(10000);
+        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES') !== -1) message.delete(3000);
         let m = await message.channel.send(':thinking: Ping');
         m = await m.edit(':thinking: Ping...');
         await m.edit(`:bulb: Pong! My responsiness is round about ${m.editedTimestamp - m.createdTimestamp}ms.`);

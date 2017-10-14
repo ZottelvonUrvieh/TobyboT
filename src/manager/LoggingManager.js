@@ -2,16 +2,16 @@ const chalk = require('chalk');
 class LoggingManager {
     constructor(bot) {
         process.on('uncaughtException', function (err) {
-            // handle the error safely
             if (err.stack)
-                return this.error(err.stack, 'UNCAUGHT: ');
-            return this.error(err, 'UNCAUGHT: ');
-        }.bind(this));
-
-        process.on('unhandledRejection', (reason, p) => {
-            if (reason.stack)
-                return this.error(reason.stack, `Promise ${p}: `);
-            return this.error(reason, `Promise ${p}: `);
+                return bot.error(err.stack, 'UNCAUGHT: ');
+            return bot.error(err, 'UNCAUGHT: ');
+        });
+        process.on('unhandledRejection', function (reason, p) {
+            if (reason && reason.name === 'DiscordAPIError' && reason.message === 'Missing Permissions')
+                return bot.discordDebug(reason + ' do do something! (Like deleting messages, kicking people, changing servers / roles etc.. for example)');
+            else if (reason.stack)
+                return bot.error(reason.message + '   ' + reason.stack, `Promise ${p}: `);
+            return bot.error(reason, `Promise ${p}: `);
         });
 
         bot.log = this.log;

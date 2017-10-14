@@ -11,10 +11,10 @@ module.exports = {
         };
         if (tag === 'edit') {
             tag = args[1];
-            let text = args.slice(1);
-            let row = await this.bot.dbManager.getTableRowByKey(table, { guild_id: message.guild.id, tag: tag });
+            let text = args.slice(2);
+            let rows = await this.bot.dbManager.getTableRowsByKey(table, { guild_id: message.guild.id, tag: tag });
             // Only if you are the owner or it does not exist yet you are allowed to edit the tag.
-            if (row === null || typeof row.owner_id === 'undefined' || row.owner_id === message.author.id) {
+            if (rows === null || rows.length === 0 || rows[0].owner_id === message.author.id) {
                 // insert/update row in the table containing the guild id, the tagname and the tagtext
                 this.bot.dbManager.setTableRowByKey(
                     table,
@@ -26,9 +26,9 @@ module.exports = {
             }
             return;
         }
-        let row = await this.bot.dbManager.getTableRowByKey(table, { guild_id: message.guild.id, tag: tag });
-        if (row === null || !row.text) return;
-        message.channel.send(row.text);
+        let rows = await this.bot.dbManager.getTableRowsByKey(table, { guild_id: message.guild.id, tag: tag });
+        if (rows === null || !rows[0] || !rows[0].text) return;
+        message.channel.send(rows[0].text);
     },
 
     configs: function () {

@@ -10,15 +10,21 @@ class DBInterface  {
             constructor() {
                 this.connectDB              = function ()                      { };
                 this.disconnectDB           = function ()                      { };
-                // ?: Is this requred? Do I ever need to know any settings?
-                this.getSettings = function () { };
 
+                this.setSettings = function (file) { };
+
+                // Get complete table
                 this.getTableRows           = function (table)                 { };
-                this.setTableRows           = function (table, rows)           { };
+                // Inserts multiple rows into a table - be sure to not to add duplicates!
+                this.insertTableRows           = function (table, rows)           { };
+                // Delete complete table
                 this.deleteTable            = function (table)                 { };
-                this.getTableRowByKey       = function (table, key)            { };
+                // Get an Array of rows
+                this.getTableRowsByKey      = function (table, key)            { };
+                // Update one row and if not yet existent insert it
                 this.setTableRowByKey       = function (table, key, row)       { };
-                this.deleteTableRowByKey    = function (table, key)            { };
+                // Delete all rows with a specific key (or set of keys)
+                this.deleteTableRowsByKey   = function (table, key)            { };
 
                 this.local                  = false;
                 this.status = 'disconnected';

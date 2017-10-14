@@ -1,6 +1,6 @@
 module.exports = {
     run: async function (message, args) {
-        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES') !== -1) message.delete(10000);
+        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES') !== -1) message.delete(10000).catch(e => { });
         const m = await message.channel.send(`Trying to unload ${args[0]}`);
         let success = this.bot.commandManager.unloadCommandByName(args[0]);
         if (success === true) await m.edit(`Command ${args[0]} successfull unloaded!`);

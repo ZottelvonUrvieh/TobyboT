@@ -23,7 +23,11 @@ But I started completely fresh and rewrote everything from scratch so that is wh
     - [x] Get an idea of a structure that I like
     - [x] Check for correct stucture of implemented Methods
   - [ ] Implementation
-    - [x] MongoDB implementation
+    - [ ] MongoDB implementation
+      - [x] Creating Tables
+      - [x] Inserting Documents
+      - [ ] deleteTable / setTableRows
+      - [ ] Move config to file so noone can use the DB access :)
     - [ ] LowDB implementation as fallback
 - [x] **Logging**
   - [x] Different console log/debug/warnings/errors for:

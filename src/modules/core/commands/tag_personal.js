@@ -2,7 +2,6 @@ module.exports = {
     run: async function (message, args) {
         if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES') !== -1) message.delete(10000);
         let tag = args[0];
-        let text = args.slice(1);
         // Define options of the table to use:
         let table = {
             // Name of the table:
@@ -10,20 +9,35 @@ module.exports = {
             // Define how the rows of the table will look like:
             schemaOptions: { owner_id: String, tag: Object, text: Object }
         };
-        if (tag === 'edit') {
+
+        if (tag === 'list') {
+            let rows = await this.bot.dbManager.getTableRowsByKey(table, { owner_id: message.author.id });
+            let m = await message.channel.send(`Following personal Tags are available for you ${message.author}:\n\`${rows.map(i => i.tag).join(', ')}\``);
+            m.delete(15000);
+            return;
+        }
+        else if (tag === 'edit') {
+            tag = args[1];
+            let text = args.slice(2);
             // insert/update row in the table containing the tag owners id, the tagname and the tagtext
+            if (text.length === 0) {
+                this.bot.dbManager.deleteTableRowsByKey(table, { owner_id: message.author.id, tag: tag });
+                let m = await message.channel.send(`Alright! Your personal tag ${tag} was deleted :ok_hand:`);
+                m.delete(5000);
+                return;
+            }
             this.bot.dbManager.setTableRowByKey(
                 table,
-                { owner_id: message.author.id, tag: text[0] },
-                { text: text.slice(1).join(' ') }
+                { owner_id: message.author.id, tag: tag },
+                { text: text.join(' ') }
             );
-            let m = await message.channel.send(`Alright! Your input was saved to your personal tag ${text[0]} :ok_hand:`);
+            let m = await message.channel.send(`Alright! Your input was saved to your personal tag ${tag} :ok_hand:`);
             m.delete(5000);
             return;
         }
-        let row = await this.bot.dbManager.getTableRowByKey(table, { owner_id: message.author.id, tag:tag });
-        if (row === null || !row.text) return;
-        message.channel.send(row.text);
+        let rows = await this.bot.dbManager.getTableRowsByKey(table, { owner_id: message.author.id, tag:tag });
+        if (rows === null || !rows[0] || !rows[0].text) return;
+        message.channel.send(rows[0].text);
     },
 
     configs: function () {
