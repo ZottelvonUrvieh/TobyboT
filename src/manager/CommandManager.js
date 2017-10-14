@@ -1,14 +1,15 @@
-const { lstatSync, readdirSync } = require('fs');
+const { readdirSync } = require('fs');
 const { join } = require('path');
 const Command = require('./classes/Command.js');
+const chalk = require('chalk');
 
 class CommandManager {
     constructor(bot) {
         this.bot = bot;
-        this.allCommands = [];
+        this.commands = [];
         // initialize all the modules and their commands
         bot.moduleManager.modules.map(mod => {
-            bot.log(`Loading commands of module ${mod.name}`);
+            bot.log(`Loading commands of module '${mod.name}'`);
             this.loadCommands(mod);
             if (mod.init) mod.init();
         });
@@ -18,42 +19,44 @@ class CommandManager {
     loadCommands(mod)  {
         const isJSFile = source => require('path').extname(source) === '.js';
         const getCommandFiles = source =>
-        readdirSync(source).map(name => {
-            if (name.startsWith('_')) return __filename;
-            return join(source, name);
-        }).filter(isJSFile);
+            readdirSync(source).map(name => {
+                if (name.startsWith('_')) return '';
+                return join(source, name);
+            }).filter(isJSFile);
 
         getCommandFiles(mod.commandsPath).map(commandFile => this.loadCommand(commandFile, mod));
     }
 
     loadCommand(commandFile, mod) {
+        this.bot.coreDebug(`Loading: ${require('path').basename(commandFile)} from Modulefolder ${mod.id}... `);
         let command = new Command(commandFile, mod, this.bot);
         if (!command) return false;
-        if (this.manageDuplicates(command) === false)
+        if (this.manageDuplicates(command) === false) {
             return false;
-        this.bot.coreDebug(`  - ${command}`);
+        }
         this.addPermissions(command);
-        this.allCommands.push(command);
+        this.commands.push(command);
         mod.commands.push(command);
+        process.stdout.write(chalk.magenta(`DONE! ${command} is loaded!`));
         return true;
     }
 
     /**
-     * Requires the module that contains the command to be loaded
+     * Requires the module that contains the command to be loaded/indexed
      *
      * @param {any} commandName
      * @memberof CommandManager
      */
     loadCommandByNameAndModuleFolderName(commandName, moduleFolderName) {
-        if (this.getCommandByName(commandName)) return false; // command already loaded
+        if (this.getCommandByCallable(commandName)) return false; // command already loaded
         let mod = this.bot.moduleManager.getModuleByFolderName(moduleFolderName);
         if (!mod) return;
         const isJSFile = source => require('path').extname(source) === '.js';
         const getCommandFiles = source =>
-        readdirSync(source).map(name => {
-            if (name.startsWith('_')) return __filename;
-            return join(source, name);
-        }).filter(isJSFile);
+            readdirSync(source).map(name => {
+                if (name.startsWith('_')) return __filename;
+                return join(source, name);
+            }).filter(isJSFile);
 
         getCommandFiles(mod.commandsPath).map(commandFile => {
             let tmpCmd = new Command(commandFile, mod, this.bot);
@@ -67,28 +70,30 @@ class CommandManager {
     }
 
     /**
-     * Unloads all the commands of a module - not the module itself (for easier reloding purposes)
+     * Unloads all the commands of a module - does not unindex the module itself (for easier reloding purposes)
      *
      * @param {any} mod
      * @memberof CommandManager
      */
     unloadModuleCommands(mod) {
-        mod.forEach(module => {
-            module.commands.forEach( cmd => this.unloadCommand(cmd), this);
-        });
+        this.bot.debug('Current mod commands: ' + mod.commands.map(m => m.cmd));
+        while (mod.commands.length > 0) {
+            this.bot.debug(`Removing: ${mod.commands[0]}`);
+            this.unloadCommand(mod.commands[0]);
+        }
     }
 
     unloadCommand(command) {
         if (command === false) return false;
         this.removeUnneededPermissions(command);
-        this.allCommands.splice(this.allCommands.indexOf(command), 1);
+        this.commands.splice(this.commands.indexOf(command), 1);
         command.mod.commands.splice(command.mod.commands.indexOf(command), 1);
         this.bot.coreDebug(`Unloaded ${command}`);
         return true;
     }
 
     unloadCommandByName(commandName) {
-        return this.unloadCommand(this.getCommandByName(commandName));
+        return this.unloadCommand(this.getCommandByCallable(commandName));
     }
 
     reloadCommand(command) {
@@ -96,15 +101,15 @@ class CommandManager {
                 this.loadCommand(command.path, command.mod);
     }
 
-    reloadCommandByName(commandName) {
-        let command = this.getCommandByName(commandName);
+    reloadCommandByCallable(commandName) {
+        let command = this.getCommandByCallable(commandName);
         if (command === false) {
             this.bot.coreDebug(`No command that listens to ${commandName} found.`);
             return false;
         }
         this.bot.coreDebug(`Reloading  ${command}.`);
         this.reloadCommand(command);
-        return true;
+        return command;
     }
 
     /**
@@ -123,31 +128,32 @@ class CommandManager {
     manageDuplicates(command) {
         // check if command name is already taken from another command name
         let conflictingCommand = false;
-        this.allCommands.forEach( cmd => {
+        this.commands.forEach( cmd => {
             if (cmd.cmd === command.cmd) conflictingCommand = cmd;
         }, this);
         if (conflictingCommand !== false) {
-            this.bot.error(`Command '${command}' could not be added - cmd is already in use from ${conflictingCommand}`);
+            process.stdout.write(chalk.red('FAILED! Due to cmd conflicts!'));
+            this.bot.error(`Command '${command}' could not be added - cmd '${command.cmd}' is already in use from ${conflictingCommand}`);
             return false;
         }
 
         // check if command name is already taken from another alias - then remove the alias for the old command
-        this.allCommands.forEach( cmd => {
+        this.commands.forEach( cmd => {
             let index = cmd.callables.indexOf(command.cmd);
             if (index !== -1) {
                 cmd.callables.splice(index, 1);
-                this.bot.warn(`Your chosen cmd ${command.cmd} for ${command} is used as an alias in ${cmd}. Removing the alias for this command. You might want to update it - just so it is clean...`);
+                process.stdout.write(chalk.yellow(`Alias conflicts! Your chosen cmd '${command.cmd}' for ${command} is used as an alias in ${cmd}. Removing the alias for this command. You might want to update it - just so it is clean... `));
             }
         }, this);
 
         // check if alias are already taken from another command - if so remove the alias from the new command
-        this.allCommands.forEach( cmd => {
+        this.commands.forEach( cmd => {
             let aliasArray = command.alias.filter( function( el ) {
                 return cmd.alias.indexOf( el ) < 0;
             } );
             if (aliasArray.length !== command.alias.length) {
                 command.alias = aliasArray;
-                this.bot.warn(`At least one of your chosen alias was already taken... Removed the alias from ${command}. Your alias now are: [ ${command.alias.join(', ')} ] You might want to update it - just so it is clean...`);
+                process.stdout.write(chalk.yellow(`Alias conflicts! At least one of your chosen alias was already taken... Removed the alias from ${command}. Your alias now are: [ ${command.alias.join(', ')} ] You might want to update it - just so it is clean... `));
             }
         }, this);
         return true;
@@ -173,9 +179,9 @@ class CommandManager {
      * @returns
      * @memberof CommandManager
      */
-    getCommandByName(cmdName) {
-        for (let i = 0; i < this.allCommands.length; i++) {
-            let cmd = this.allCommands[i];
+    getCommandByCallable(cmdName) {
+        for (let i = 0; i < this.commands.length; i++) {
+            let cmd = this.commands[i];
             if (cmd.callables.indexOf(cmdName) !== -1) {
                 return cmd;
             }
@@ -189,13 +195,17 @@ class CommandManager {
         const args = msg.content.slice(this.bot.prefix.length).trim().split(/ +/g);
         const cmdName = args.shift();//.toLowerCase(); maybe want to do this...
 
-        let cmd = this.getCommandByName(cmdName);
+        let cmd = this.getCommandByCallable(cmdName);
         if (!cmd) return;
 
         if ((cmd.ownersOnly || cmd.mod.ownersOnly) && this.bot.owners.indexOf(msg.author.id) === -1)
-            return; // in debug mode and not owner
-
-        cmd.run(msg, args);
+            return; // in ownership only mode and not an owner
+        try {
+            cmd.run(msg, args);
+        }
+        catch (err) {
+            cmd.error(err);
+        }
     }
 }
 

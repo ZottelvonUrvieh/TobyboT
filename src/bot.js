@@ -19,7 +19,7 @@ bot.dbManager = new DBManager(bot);
 // eve.inject(bot);
 
 bot.on('ready', () => {
-    bot.log("Successfully logged into Discord!");
+    bot.log('Successfully logged into Discord!');
     bot.generateInvite(bot.permissions).then(link => {
         bot.log(`Generated bot invite link (permissions: [${bot.permissions}]):`);
         bot.log(`${chalk.underline(link)}`);
@@ -29,7 +29,7 @@ bot.on('ready', () => {
 });
 
 bot.on('disconnect', () => {
-    bot.warn("Disconnected from Discord!");
+    bot.warn('Disconnected from Discord!');
     bot.moduleManager.disconnectCalls();
 });
 
@@ -39,9 +39,9 @@ bot.on('message', msg => {
 });
 
 // simple error handling
-bot.on("error", (e) => bot.error(e.stack));
-bot.on("warn", (e) => bot.warn(e));
-bot.on("debug", (e) => bot.discordDebug(e));
+bot.on('error', (e) => bot.error(e.stack));
+bot.on('warn', (e) => bot.warn(e));
+bot.on('debug', (e) => bot.discordDebug(e));
 
 // TODO: Let this handle a client manager to handle reconnecting and stuff?
 bot.log('Waiting for bot to log in...');

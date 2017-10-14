@@ -1,8 +1,5 @@
-const DBHandler = require('./classes/MongoDBHandler');
+const DBHandler = require('./classes/MongoDBHandler2');
 // const DBHandler2 = require('./classes/LowDBHandler'); // fallback
-if (true) {
-
-}
 class DBManager extends DBHandler {
     constructor(bot) {
         super(bot);

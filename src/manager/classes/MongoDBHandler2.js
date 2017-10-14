@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
+const discordjs = require('discord.js');
 // Use native promises
 mongoose.Promise = global.Promise;
-
-let entries;
 
 const DBInterface = require('./DBInterface');
 class MongoDBHandler extends DBInterface{
     constructor(bot) {
-        super();
+        super(bot);
         this.bot = bot;
 
         // These are the required functions that the DBManager wants to have implemented
@@ -53,17 +52,13 @@ class MongoDBHandler extends DBInterface{
     }
     setup() {
         this.db = mongoose.connection;
-        this.db.on('error', e => this.bot.error(e.stack));
-        // make db logging independed from having access to a bot object
-        this.db.log = this.bot.log;
-        this.db.warn = this.bot.warn;
-        this.db.error = this.bot.error;
-        this.db.loggify = this.bot.loggify;
+        this.db.on('error', err => this.error(err));
 
-        entries = this.db.model('entry', mongoose.Schema({ ID: String, keys: {} }));
-        // users = this.db.model('user', mongoose.Schema({ userID: String, keys: {}}));
-        // guilds = this.db.model('guild', mongoose.Schema({ guildID: String, keys: {}}));
-        // channels = this.db.model('channel', mongoose.Schema({ channelID: String, keys: {}}));
+        // Use a table for each category to keep it a bit organized - TODO: maybe add more than just ID, key and data?
+        this.users = this.db.model('user', mongoose.Schema({ ID: String, key: Object, data: Object }));
+        this.guilds = this.db.model('guild', mongoose.Schema({ ID: String, key: Object, data: Object }));
+        this.channels = this.db.model('channel', mongoose.Schema({ ID: String, Object: Object, data: Object }));
+
 
         let mongodbHost = 'localhost';
         let mongodbPort = '27017';
@@ -90,50 +85,44 @@ class MongoDBHandler extends DBInterface{
     connectDB() {
         if (this.db._readyState === 1 || this.db._readyState === 2)
             return; // we are already connected / connecting atm
-        this.bot.log('Connecting to MongoDB...');
-        mongoose.connect(this.mongoDBurl, { useMongoClient: true });
+        this.log('Connecting to MongoDB...');
+        mongoose.connect(this.mongoDBurl, { useMongoClient: true }).catch(() => { }); // we handle errors with the function: this.db.on
         this.db.once('open', function () {
-            this.log('Successfully connected to MongoDB.');
-        });
+            this.log('Successfully connected to MongoDB.', 'Sweet label');
+        }.bind(this));
+    }
+
+    getCategoryFromDiscordObject(category) {
+        if (category instanceof discordjs.Channel)
+            return this.channels;
+        else if (category instanceof discordjs.User || category instanceof discordjs.GuildMember)
+            return this.users;
+        else if (category instanceof discordjs.Guild)
+            return this.guilds;
+        return this.others;
     }
 
     async getDataByKey(category, key) {
-        let db_entry = await entries.findOne({ ID: category.id }, function (err, /*entry*/) {
-            if (err) return this.error(err.stack);
-        });
-        return db_entry.keys[key] ? db_entry.keys[key] : null;
+        let catDB = this.getCategoryFromDiscordObject(category);
+        // eslint-disable-next-line
+        let db_entry = await catDB.findOne({ ID: category.id, key: key }, function (err, entry) {
+            if (err) return console.error(err.stack);
+        }.bind(this));
+        return db_entry ? db_entry.data : null;
     }
 
     async getData(category) {
+        let catDB = this.getCategoryFromDiscordObject(category);
         // eslint-disable-next-line
-        let db_entry = await entries.findOne({ ID: category.id }, function (err, entry) {
+        let db_entries = await catDB.find({ ID: category.id }, function (err, entry) {
             if (err) return this.error(err.stack);
-        });
-        return db_entry.keys ? db_entry.keys : null;
+        }.bind(this));
+        return db_entries ? db_entries : null;
     }
 
     async setDataByKey(category, key, data) {
-        return entries.findOne({ ID: category.id }, function (err, entry) {
-            if (err) return this.error(err.stack);
-            if (typeof data === 'undefined') {
-                if (!entry) return;
-                delete entry.keys[key];
-            }
-            else {
-                if (!entry) {
-                    entry = new entries({ ID: category.id, keys: {} });
-                }
-                entry.keys[key] = data;
-            }
-            entry.markModified('keys');
-            entry.save(function (err, ) {
-                if (err) this.error(err.stack);
-            });
-        });
-    }
-
-    async setData(category, data) {
-        return entries.findOne({ ID: category.id }, function (err, entry) {
+        let catDB = this.getCategoryFromDiscordObject(category);
+        return catDB.findOne({ ID: category.id, key: key }, function (err, entry) {
             if (err) return this.error(err.stack);
             if (typeof data === 'undefined') {
                 if (!entry) return;
@@ -141,9 +130,30 @@ class MongoDBHandler extends DBInterface{
             }
             else {
                 if (!entry) {
-                    entry = new entries({ ID: category.id, keys: {} });
+                    entry = new catDB({ ID: category.id, key: key, data: data });
                 }
-                entry.keys = data;
+                else entry.data = data;
+            }
+            entry.markModified();
+            entry.save(function (err, ) {
+                if (err) this.error(err.stack);
+            });
+        }.bind(this));
+    }
+
+    async setData(category, data) {
+        let catDB = this.getCategoryFromDiscordObject(category);
+        if (typeof data === 'undefined') {
+            return catDB.find({ ID: category.id }).remove().exec();
+        }
+
+        return catDB.findOne({ ID: category.id }, function (err, entry) {
+            if (err) return this.error(err.stack);
+            else {
+                if (!entry) {
+                    entry = new catDB({ ID: category.id });
+                }
+                else entry.key = data;
             }
             entry.markModified();
             entry.save(function (err, ) {
@@ -152,15 +162,16 @@ class MongoDBHandler extends DBInterface{
         });
     }
 
+    // eslint-disable-next-line
     async deleteData(category) {
-        entries.findOneAndRemove({ ID: category.id }, function (err) {
-            if (err) return this.error(err.stack);
-        });
+        // Not implemented yet
     }
 
-    // eslint-disable-next-line
     async deleteDataByKey(category, key) {
-        // Not implemented yet
+        let catDB = this.getCategoryFromDiscordObject(category);
+        catDB.findOneAndRemove({ ID: category.id , key: key}, function (err) {
+            if (err) return this.error(err.stack);
+        });
     }
 }
 

@@ -14,7 +14,7 @@ class Module {
             bot.error(`In ${this.toString()}: ${output}`);
         };
         this.toString = function () {
-            return `Module '${this.name}'`;
+            return `${this.name}`;
         };
 
         this.id = require('path').basename(path);
@@ -25,13 +25,13 @@ class Module {
             loadedData = require(fileName);
         } catch(e) {
             bot.error(`Not able to read the required file 'settings.js' for the Module located in the folder ${path}` +
-                      `\nCheck that you have this file in the Module folder and that is does not contains mistakes.` +
-                      `\nLook at the example settings.js in the Modulefolders '_exampleModule' or 'builtin' as reference.` +
-                      `\n-> Skipping the module!`);
+                      '\nCheck that you have this file in the Module folder and that is does not contains mistakes.' +
+                      '\nLook at the example settings.js in the Modulefolders \'_exampleModule\' or \'builtin\' as reference.' +
+                      '\n-> Skipping the module!');
         }
         this.bot = bot;
         this.configs = loadedData.config();
-        for (var property in this.configs) {
+        for (let property in this.configs) {
             if (this.configs.hasOwnProperty(property)) {
                 this[property] = this.configs[property];
             }
@@ -40,6 +40,19 @@ class Module {
         this.path = path;
         this.commandsPath = require('path').resolve(path, 'commands');
         this.eventsPath = require('path').resolve(path, 'events');
+
+        this.help = function (detailed) {
+            if (detailed) return this.detailedHelp();
+            let retString = `__**${this.name}**__ (ID: ${this.id}):\n${this.description}`;
+            return retString;
+        };
+
+        this.detailedHelp = function () {
+            let retString = `**${this.name}** (ID: ${this.id}):\n${this.description}`;
+            if (this.tags.length > 0) retString += `\n\n**Tags:** [${this.tags.join(', ')}]`;
+            else retString += '\n\n**Tags:** None';
+            return retString;
+        };
 
         // Called when bot starts, before login into Discord, before the commands get loaded. One time only.
         this.pre_init = loadedData.pre_init;

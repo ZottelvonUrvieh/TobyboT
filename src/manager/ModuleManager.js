@@ -1,35 +1,39 @@
-const { lstatSync, readdirSync } = require('fs')
-const { join } = require('path')
+const { lstatSync, readdirSync } = require('fs');
+const { join } = require('path');
 const Module = require('./classes/Module.js');
+const CommandManager = require('./CommandManager');
 
 class ModuleManager {
     constructor(bot) {
         this.bot = bot;
         this.modules = [];
-        this.loadModules();
+        this.indexModules();
     }
-
-    loadModules() {
-        const isDirectory = source => lstatSync(source).isDirectory();
-        const getDirectories = source =>
-        readdirSync(source).map(name => {
+    isDirectory(source) { return lstatSync(source).isDirectory(); }
+    getDirectories(source) {
+        return readdirSync(source).map(name => {
             if (name.startsWith('_')) return __filename; // ignore folders and files with leading underscore
             return join(source, name);
-        }).filter(isDirectory);
-
-        this.bot.coreDebug('Indexing Modules:');
-        getDirectories(join(__dirname, '..', 'modules')).map(modFolder => {
-            this.loadModule(modFolder);
-        });
+        }).filter(this.isDirectory);
     }
 
-    loadModule(modFolder) {
+    indexModules() {
+        this.bot.coreDebug('Start Indexing Modules');
+        this.getDirectories(join(__dirname, '..', 'modules')).map(modFolder => {
+            this.indexModule(modFolder);
+        });
+        this.bot.coreDebug('Finished Indexing Modules');
+    }
+
+    indexModule(modFolder) {
+        this.bot.coreDebug(`Index Module from folder: ${require('path').basename(modFolder)}... `);
         let mod = new Module(modFolder, this.bot);
         if (mod.name === undefined) return;
-        this.bot.coreDebug('  - ' + mod);
         this.addPermissions(mod);
         this.modules.push(mod);
         if (mod.module_load) mod.module_load();
+        process.stdout.write(require('chalk').magenta(`DONE! Module '${mod}' is indexed!`));
+        return mod;
     }
 
     addPermissions(mod) {
@@ -72,8 +76,43 @@ class ModuleManager {
         this.bot.permissions = neededPerms;
     }
 
-    unloadModule(modFolder) {
-        mod.module_unload();
+    unloadModuleByID(modID) {
+        for (let index = 0; index < this.modules.length; index++) {
+            let mod = this.modules[index];
+            if (mod.id === modID) {
+                this.bot.commandManager.unloadModuleCommands(mod);
+                mod.module_unload();
+                this.modules.splice(index, 1);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    reloadModule(mod) {
+        this.unloadModuleByID(mod.id);
+        let newMod = this.indexModule(mod.path);
+        this.bot.commandManager.loadCommands(newMod);
+        return newMod;
+    }
+
+    reloadModuleByID(modID) {
+        if (this.unloadModuleByID(modID) === false) return false;
+        let path = require('path').resolve(__dirname, '..', 'modules', modID);
+        this.bot.coreDebug(`Reloading module with path ${path}`);
+        if (this.isDirectory(path)) {
+            let mod = this.indexModule(path);
+            this.bot.commandManager.loadCommands(mod);
+            return mod;
+        }
+        this.bot.error(`Was not able to reload Mod with ID ${modID}... Have you deleted or renamed the folder?`);
+        return false;
+    }
+
+    reloadAllModules () {
+        this.bot.moduleManager = new ModuleManager(this.bot);
+        this.bot.commandManager = new CommandManager(this.bot);
+        return 'Everything ';
     }
 
     connectCalls() {
@@ -84,11 +123,12 @@ class ModuleManager {
         this.modules.map(mod => { if (mod.disconnect) mod.disconnect(); });
     }
 
-    getModuleByFolderName(modFolderName) {
+    getModuleByID(modID) {
         for (let i = 0; i < this.modules.length; i++) {
             let mod = this.modules[i];
-            if (mod.id === modFolderName) return mod;
+            if (mod.id === modID) return mod;
         }
+        return false;
     }
 }
 

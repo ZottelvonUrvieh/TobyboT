@@ -1,3 +1,4 @@
+/* eslint-disable no-control-regex */
 class ConfigManager {
     constructor(bot) {
         this.bot = bot;
@@ -8,7 +9,7 @@ class ConfigManager {
     parse_config_file() {
         let lines = require('fs').readFileSync('config.cfg').toString().split('\n');
         function startsWith(text, test) {
-            let r = new RegExp(`^${test}.*=`, `g`);
+            let r = new RegExp(`^${test}.*=`, 'g');
             return r.test(text);
         }
         lines.forEach(function(line) {
@@ -47,7 +48,7 @@ class ConfigManager {
         if (prefix === '' || prefix === this.bot.prefix) {
             return false;
         }
-        var fs = require('fs');
+        let fs = require('fs');
         let config = fs.readFileSync('config.cfg').toString();
         let newConfig = config.replace(new RegExp('prefix=.*\n', 'g'), `prefix=${prefix}\n`);
         fs.writeFileSync('config.cfg', newConfig, 'utf8', function (err) {

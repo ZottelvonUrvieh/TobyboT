@@ -4,9 +4,10 @@ const path = require('path');
 const DBInterface = require('./DBInterface');
 
 class LowDBHandler extends DBInterface {
+    // eslint-disable-next-line
     constructor(bot) {
         super();
-        this.dataFolder = path.resolve(__foldername, 'lowdb_localDB');
+        // this.dataFolder = path.resolve(__foldername, 'lowdb_localDB');
 
         this.connectDB              = function ()                      { };
         this.disconnectDB           = function ()                      { };
@@ -15,37 +16,37 @@ class LowDBHandler extends DBInterface {
 
         // ?: Am I ok with handing over the whole objects or do I just want to restrict it to the ID's?
         // ?: I think objects make thinks a bit more handy, adds options and is easier to use?
-        this.getUserData            = get (user);
-        this.setUserData            = set (user, data);
-        this.deleteUserData         = delete (user);
-        this.getUserDataByKey       = getKey (user, key);
-        this.setUserDataByKey       = setKey (user, key, data);
-        this.deleteUserDataByKey    = deleteKey (user, key);
+        // this.getUserData            = get (user);
+        // this.setUserData            = set (user, data);
+        // this.deleteUserData         = delete (user);
+        // this.getUserDataByKey       = getKey (user, key);
+        // this.setUserDataByKey       = setKey (user, key, data);
+        // this.deleteUserDataByKey    = deleteKey (user, key);
 
-        this.getGuildData           = get (guild);
-        this.setGuildData           = set (guild, data);
-        this.deleteGuildData        = delete (guild);
-        this.getGuildDataByKey      = getKey (guild, key);
-        this.setGuildDataByKey      = setKey (guild, key, data);
-        this.deleteGuildDataByKey   = deleteKey (guild, key);
+        // this.getGuildData           = get (guild);
+        // this.setGuildData           = set (guild, data);
+        // this.deleteGuildData        = delete (guild);
+        // this.getGuildDataByKey      = getKey (guild, key);
+        // this.setGuildDataByKey      = setKey (guild, key, data);
+        // this.deleteGuildDataByKey   = deleteKey (guild, key);
 
-        this.getChannelData         = get (channel);
-        this.setChannelData         = set (channel, data);
-        this.deleteChannelData      = delete (channel);
-        this.getChannelDataByKey    = getKey (channel, key);
-        this.setChannelDataByKey    = setKey (channel, key, data);
-        this.deleteChannelDataByKey = deleteKey (channel, key);
+        // this.getChannelData         = get (channel);
+        // this.setChannelData         = set (channel, data);
+        // this.deleteChannelData      = delete (channel);
+        // this.getChannelDataByKey    = getKey (channel, key);
+        // this.setChannelDataByKey    = setKey (channel, key, data);
+        // this.deleteChannelDataByKey = deleteKey (channel, key);
 
-        // ?: Do I want all the functions above? Or would be just having this (or renamed
-        // ?: version like getData(key) ...) enough? Would be less clear tho...
-        this.getOtherData           = this.get (other);
-        this.setOtherData           = set (other, data);
-        this.deleteOtherData        = delete (other);
-        this.getOtherDataByKey      = getKey (other, key);
-        this.setOtherDataByKey      = setKey (other, key, data);
-        this.deleteOtherDataByKey   = deleteKey (other, key);
-        this.local                  = false;
-        this.status                 = 'disconnected';
+        // // ?: Do I want all the functions above? Or would be just having this (or renamed
+        // // ?: version like getData(key) ...) enough? Would be less clear tho...
+        // this.getOtherData           = this.get (other);
+        // this.setOtherData           = set (other, data);
+        // this.deleteOtherData        = delete (other);
+        // this.getOtherDataByKey      = getKey (other, key);
+        // this.setOtherDataByKey      = setKey (other, key, data);
+        // this.deleteOtherDataByKey   = deleteKey (other, key);
+        // this.local                  = false;
+        // this.status                 = 'disconnected';
     }
 
     getDBHandle(type) {

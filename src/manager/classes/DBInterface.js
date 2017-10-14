@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 class DBInterface  {
-    constructor() {
+    constructor(bot) {
         // Define which properties has to be set and what their arguments have to be called (ordered)
         // (to avoid wrong order of arguments throwing errors)
 
@@ -44,9 +45,14 @@ class DBInterface  {
                 this.setOtherDataByKey      = function (other, key, data)      { };
                 this.deleteOtherDataByKey   = function (other, key)            { };
                 this.local                  = false;
-                this.status                 = 'disconnected';
+                this.status = 'disconnected';
+
             }
-        }
+        };
+        this.error = function (error) { return bot.error(error, 'DB Error: '); };
+        this.warn = function (message) { return bot.warn(message, 'DB Warning: '); };
+        this.debug = function (message) { return bot.debug(message, 'DB Debug: '); };
+        this.log = function (message) { return bot.log(message, 'DB: '); };
 
         this.implementationCheck = function (obj) {
             let STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
@@ -75,9 +81,9 @@ class DBInterface  {
                     wrongType.push(`${property} should be a ${typeof this.delegates[property]} but is a ${typeof property}`);
                 }
             }
-            let allCorrect = (notImplemented.length + parameterMissmatch.length + wrongType.length) === 0
+            let allCorrect = (notImplemented.length + parameterMissmatch.length + wrongType.length) === 0;
             return {notImplemented, parameterMissmatch, wrongType, allCorrect};
-        }
+        };
     }
 }
 
