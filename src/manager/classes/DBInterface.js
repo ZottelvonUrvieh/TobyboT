@@ -11,39 +11,15 @@ class DBInterface  {
                 this.connectDB              = function ()                      { };
                 this.disconnectDB           = function ()                      { };
                 // ?: Is this requred? Do I ever need to know any settings?
-                this.getSettings            = function ()                      { };
+                this.getSettings = function () { };
 
-                // ?: Am I ok with handing over the whole objects or do I just want to restrict it to the ID's?
-                // ?: I think objects make thinks a bit more handy, adds options and is easier to use?
-                this.getUserData            = function (user)                  { };
-                this.setUserData            = function (user, data)            { };
-                this.deleteUserData         = function (user)                  { };
-                this.getUserDataByKey       = function (user, key)             { };
-                this.setUserDataByKey       = function (user, key, data)       { };
-                this.deleteUserDataByKey    = function (user, key)             { };
+                this.getTableRows           = function (table)                 { };
+                this.setTableRows           = function (table, rows)           { };
+                this.deleteTable            = function (table)                 { };
+                this.getTableRowByKey       = function (table, key)            { };
+                this.setTableRowByKey       = function (table, key, row)       { };
+                this.deleteTableRowByKey    = function (table, key)            { };
 
-                this.getGuildData           = function (guild)                 { };
-                this.setGuildData           = function (guild, data)           { };
-                this.deleteGuildData        = function (guild)                 { };
-                this.getGuildDataByKey      = function (guild, key)            { };
-                this.setGuildDataByKey      = function (guild, key, data)      { };
-                this.deleteGuildDataByKey   = function (guild, key)            { };
-
-                this.getChannelData         = function (channel)               { };
-                this.setChannelData         = function (channel, data)         { };
-                this.deleteChannelData      = function (channel)               { };
-                this.getChannelDataByKey    = function (channel, key)          { };
-                this.setChannelDataByKey    = function (channel, key, data)    { };
-                this.deleteChannelDataByKey = function (channel, key)          { };
-
-                // ?: Do I want all the functions above? Or would be just having this (or renamed
-                // ?: version like getData(key) ...) enough? Would be less clear tho...
-                this.getOtherData           = function (other)                 { };
-                this.setOtherData           = function (other, data)           { };
-                this.deleteOtherData        = function (other)                 { };
-                this.getOtherDataByKey      = function (other, key)            { };
-                this.setOtherDataByKey      = function (other, key, data)      { };
-                this.deleteOtherDataByKey   = function (other, key)            { };
                 this.local                  = false;
                 this.status = 'disconnected';
 

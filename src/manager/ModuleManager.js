@@ -42,7 +42,7 @@ class ModuleManager {
         });
         if (newPerms.length === 0) return;
         this.bot.permissions = this.bot.permissions.concat(newPerms);
-        this.bot.coreDebug(`      Adding permissions due to Module ${mod.name} settings: ${newPerms}`);
+        this.bot.coreDebug(` Adding permissions due to Module ${mod.name} settings: ${newPerms} `);
     }
 
     /**

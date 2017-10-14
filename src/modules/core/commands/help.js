@@ -69,6 +69,7 @@ async function displayCommandHelp(message, callable, cmd) {
 
 module.exports = {
     run: async function (message, args) {
+        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES') !== -1) message.delete(10000);
         let success;
         if (args.length === 0) {
             success = await displayGeneralHelp(message, this);
@@ -101,13 +102,14 @@ module.exports = {
         this.alias = ['h'];
         // If more needed than in the module already configured e.g. MESSAGE_DELETE
         this.permissions = [];
-        // 'GUILD_ONLY', 'DM_ONLY', 'ALL' - where the command can be triggered
-        this.location = 'ALL';
+        // 'dm', 'group', 'text', 'voice' - where the command can be triggered. 'text' is in guild channels
+        this.location = ['dm', 'group', 'text'];
         // Description for the help / menue
         this.description = 'Can give an overview what commands are available and what they do.';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function() {
             return  `General help: \`${this.bot.prefix}${this.cmd}\`\n` +
+                    `Module specific help: \`${this.bot.prefix}${this.cmd} moduleID\`` +
                     `Command specific help: \`${this.bot.prefix}${this.cmd} commandName\``;
         };
         // Makes the bot message how to use the command correctly if you throw an exception

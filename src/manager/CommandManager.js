@@ -165,7 +165,7 @@ class CommandManager {
         });
         if (newPerms.length === 0) return;
         this.bot.permissions = this.bot.permissions.concat(newPerms);
-        this.bot.coreDebug(`      Adding permissions due to ${cmd} settings: ${newPerms}`);
+        this.bot.coreDebug(` Adding permissions due to ${cmd} settings: ${newPerms} `);
     }
 
     removeUnneededPermissions(command) {
@@ -189,7 +189,7 @@ class CommandManager {
         return false;
     }
 
-    parseCommand(msg) {
+    async parseCommand(msg) {
         if (msg.content.startsWith(this.bot.prefix) === false) return;
 
         const args = msg.content.slice(this.bot.prefix.length).trim().split(/ +/g);
@@ -198,13 +198,16 @@ class CommandManager {
         let cmd = this.getCommandByCallable(cmdName);
         if (!cmd) return;
 
+        // Check ownership only mode and if msg author is owner
         if ((cmd.ownersOnly || cmd.mod.ownersOnly) && this.bot.owners.indexOf(msg.author.id) === -1)
-            return; // in ownership only mode and not an owner
-        try {
-            cmd.run(msg, args);
-        }
-        catch (err) {
-            cmd.error(err);
+            return;
+        // Check if this command should be executed in this channel ~ depending on cmd settings
+        if (cmd.location.indexOf(msg.channel.type) === -1)
+            return;
+        let error = await cmd.run(msg, args);
+        if (error instanceof Error) {
+            if (cmd.showUsageOnError) msg.channel.send(`**Something went wrong:**\n\`${error.message}\`\n\n${cmd.usage()}`);
+            cmd.error(error);
         }
     }
 }

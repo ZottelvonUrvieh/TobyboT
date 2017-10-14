@@ -35,7 +35,7 @@ module.exports = {
             name: 'The Core of the bot',
             description: 'This is the barebone that is needed to operate the bot.',
             tags: ['core'],           // Some tags for the menu
-            permissions: [],    // Permissions your module requires (eg. MESSAGE_DELETE)
+            permissions: ['MANAGE_MESSAGES'],    // Permissions your module requires (eg. MANAGE_MESSAGES)
             debugMode: false,   // weather or not to show the debug messages in the console
             ownersOnly: false   // If true this module is unusable to anyone besides the configured owners
         };

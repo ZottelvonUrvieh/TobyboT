@@ -1,16 +1,34 @@
 module.exports = {
     run: async function (message, args) {
-        let command = args[0];
-        let text = args.slice(1);
-        if (command === 'create') {
-            this.bot.dbManager.setGuildDataByKey(message.guild, text[0], `gtag_${text.slice(1).join(' ')}`);
-            let m = await message.channel.send(`Alright! Your input was saved to the guildwide tag ${text[0]} :ok_hand:`);
-            m.delete(5000);
+        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES') !== -1) message.delete(10000);
+        let tag = args[0];
+        // Define options of the table to use:
+        let table = {
+            // Name of the table:
+            name: 'guild_tag',
+            // Define how the rows of the table will look like:
+            schemaOptions: { guild_id: String, owner_id: String, tag: Object, text: Object }
+        };
+        if (tag === 'edit') {
+            tag = args[1];
+            let text = args.slice(1);
+            let row = await this.bot.dbManager.getTableRowByKey(table, { guild_id: message.guild.id, tag: tag });
+            // Only if you are the owner or it does not exist yet you are allowed to edit the tag.
+            if (row === null || typeof row.owner_id === 'undefined' || row.owner_id === message.author.id) {
+                // insert/update row in the table containing the guild id, the tagname and the tagtext
+                this.bot.dbManager.setTableRowByKey(
+                    table,
+                    { guild_id: message.guild.id, owner_id: message.author.id, tag: text[0] },
+                    { text: text.slice(1).join(' ') }
+                );
+                let m = await message.channel.send(`Alright! Your input was saved to the guildwide tag ${text[0]} :ok_hand:`);
+                m.delete(5000);
+            }
             return;
         }
-        let data = await this.bot.dbManager.getGuildDataByKey(message.guild, `gtag_${command}`);
-        if (!data) return;
-        message.channel.send(data);
+        let row = await this.bot.dbManager.getTableRowByKey(table, { guild_id: message.guild.id, tag: tag });
+        if (row === null || !row.text) return;
+        message.channel.send(row.text);
     },
 
     configs: function () {
@@ -22,13 +40,13 @@ module.exports = {
         this.alias = [];
         // If more needed than in the module already configured e.g. MESSAGE_DELETE
         this.permissions = [];
-        // 'GUILD_ONLY', 'DM_ONLY', 'ALL' - where the command can be triggered
-        this.location = 'ALL';
+        // 'dm', 'group', 'text', 'voice' - where the command can be triggered. 'text' is in guild channels
+        this.location = ['text'];
         // Description for the help / menue
         this.description = 'Make awesome global tags that everyone on the server can use!';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function () {
-            return  `Create tags with: \`${this.bot.prefix}${this.cmd} create nameOfTheTag This is some cool text.\`\n` +
+            return  `Create/edit tags with: \`${this.bot.prefix}${this.cmd} edit nameOfTheTag This is some cool text.\`\n` +
                     `Show a tag with: \`${this.bot.prefix}${this.cmd} nameOfTheTag\``;
         };
         // Makes the bot message how to use the command correctly if you throw an exception
@@ -38,7 +56,7 @@ module.exports = {
         // Gives some tags in the help menue
         this.tags = ['Core', 'Genera', 'Social'];
         // If true the debugmessages of this Command will be displayed in the console
-        this.debugMode = false;
+        this.debugMode = true;
         // If true the Command is only usable for the configured owners
         this.ownersOnly = false;
     }

@@ -2,6 +2,10 @@ module.exports = {
     // eslint-disable-next-line
     run: async function (message, args) {
         // this code will get executed everytime the configured cmd or alias with the correct prefix is called
+        // You can have this line for example to make the bot delete the commands that triggered this if
+        // you have set the permissions in the settings of this command or the mod...
+        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES' !== -1)) message.delete(10000);
+
         // you have access to things like
         this.debug('An example debug text for the console to show more information while in debug mode');
         this.log('An example log for the console to show important information');
@@ -42,10 +46,10 @@ module.exports = {
         this.cmd = 'EasyToRememberCommand';
         // All these will trigger the run function aswell
         this.alias = ['Some', 'alias', 'youLike'];
-        // If more needed than in the module already configured e.g. MESSAGE_DELETE
+        // If more needed than in the module already configured e.g. MANAGE_MESSAGES (see config.conf for all)
         this.permissions = [];
-        // 'GUILD_ONLY', 'DM_ONLY', 'ALL' - where the command can be triggered
-        this.location = 'ALL';
+        // 'dm', 'group', 'text', 'voice' - where the command can be triggered. 'text' is in guild channels
+        this.location = ['dm', 'group', 'text'];
         // Description for the help / menue
         this.description = 'Can be awesome with awesomeness!';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
@@ -53,7 +57,7 @@ module.exports = {
             return  `To do something do this: \`${this.bot.prefix}${this.cmd}\`\n` +
                     `To do something cooler do this: \`${this.bot.prefix}${this.cmd} someArgument orTwo\``;
         };
-        // Makes the bot message how to use the command correctly if you throw an exception
+        // Makes the bot message how to use the command correctly if you return an error
         this.showUsageOnError = false;
         // Decides where it will be listen in the help menue
         this.category = 'General';

@@ -1,6 +1,7 @@
-const DBHandler = require('./classes/MongoDBHandler2');
+const DBImplement = require('./classes/DBImplementation_MongoDB');
+// TODO: implement this? Or naw?
 // const DBHandler2 = require('./classes/LowDBHandler'); // fallback
-class DBManager extends DBHandler {
+class DBManager extends DBImplement {
     constructor(bot) {
         super(bot);
         this.bot = bot;

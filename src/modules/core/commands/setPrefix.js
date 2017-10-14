@@ -1,7 +1,9 @@
 module.exports = {
-    run: async function (message, args){
+    run: async function (message, args) {
+        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES') !== -1) message.delete(10000);
         const m = await message.channel.send(`Setting the prefix to \`${args[0]}\``);
-        let success = this.bot.configManager.setPrefix(args[0]);
+        let success = false;
+        if (args[0] && args[0].length > 0) success = this.bot.configManager.setPrefix(args[0]);
         if (success === true) await m.edit(`Prefix successfully set to \`${args[0]}\`!`);
         else await m.edit(`Was not able to successfully set Prefix to \`${args[0]}\``);
         m.delete(5000);
@@ -16,8 +18,8 @@ module.exports = {
         this.alias = ['setPrefix', 'sp'];
         // If more needed than in the module already configured e.g. MESSAGE_DELETE
         this.permissions = [];
-        // 'GUILD_ONLY', 'DM_ONLY', 'ALL' - where the command can be triggered
-        this.location = 'ALL';
+        // 'dm', 'group', 'text', 'voice' - where the command can be triggered. 'text' is in guild channels
+        this.location = ['dm', 'group', 'text'];
         // Description for the help / menue
         this.description = 'Allows you to change the prefix the bot reacts to.';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error

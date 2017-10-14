@@ -1,8 +1,9 @@
 module.exports = {
     run: async function (message, ) {
+        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES') !== -1) message.delete(10000);
         let m = await message.channel.send(':thinking: Ping');
         m = await m.edit(':thinking: Ping...');
-        await m.edit(`:bulb: Pong! My responsiness is about ${m.editedTimestamp - m.createdTimestamp}ms`);
+        await m.edit(`:bulb: Pong! My responsiness is round about ${m.editedTimestamp - m.createdTimestamp}ms.`);
         m.delete(5000);
     },
 
@@ -13,10 +14,10 @@ module.exports = {
         this.cmd = 'ping';
         // All these will trigger the run function aswell
         this.alias = ['pong'];
-        // If more needed than in the module already configured e.g. MESSAGE_DELETE
+        // If more needed than in the module already configured e.g. MANAGE_MESSAGES
         this.permissions = [];
-        // 'GUILD_ONLY', 'DM_ONLY', 'ALL' - where the command can be triggered
-        this.location = 'ALL';
+        // 'dm', 'group', 'text', 'voice' - where the command can be triggered. 'text' is in guild channels
+        this.location = ['dm', 'group', 'text'];
         // Description for the help / menue
         this.description = 'Gets feedback about the ping of the bot.';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error

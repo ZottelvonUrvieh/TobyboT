@@ -65,3 +65,6 @@ typings/
 
 # yarn
 yarn.lock
+
+# VS Code configs
+/.vscode

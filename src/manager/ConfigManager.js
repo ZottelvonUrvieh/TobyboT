@@ -50,7 +50,7 @@ class ConfigManager {
         }
         let fs = require('fs');
         let config = fs.readFileSync('config.cfg').toString();
-        let newConfig = config.replace(new RegExp('prefix=.*\n', 'g'), `prefix=${prefix}\n`);
+        let newConfig = config.replace(new RegExp('prefix.*=.*\n', 'g'), `prefix = ${prefix}\n`);
         fs.writeFileSync('config.cfg', newConfig, 'utf8', function (err) {
             if (err) return console.log(err.stack);
         });
