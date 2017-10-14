@@ -4,13 +4,13 @@ module.exports = {
         // this code will get executed everytime the configured cmd or alias with the correct prefix is called
         // You can have this line for example to make the bot delete the commands that triggered this if
         // you have set the permissions in the settings of this command or the mod...
-        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES' !== -1)) message.delete(10000);
+        // if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES' !== -1)) message.delete(10000);
 
         // you have access to things like
-        this.debug('An example debug text for the console to show more information while in debug mode');
-        this.log('An example log for the console to show important information');
-        this.warn('Yeah... you get the point...');
-        this.error('I am still gonna list them all :P');
+        // this.debug('An example debug text for the console to show more information while in debug mode');
+        // this.log('An example log for the console to show important information');
+        // this.warn('Yeah... you get the point...');
+        // this.error('I am still gonna list them all :P');
         // they have a bit of sugar to them to keep the console clean and easy to understand which part of
         // the bot is causing what. (Colors + Code at the beginning + Name of Module + Command where it happend)
 

@@ -9,6 +9,12 @@ module.exports = {
             // Define how the rows of the table will look like:
             schemaOptions: { guild_id: String, owner_id: String, tag: Object, text: Object }
         };
+        if (tag === 'list') {
+            let rows = await this.bot.dbManager.getTableRowsByKey(table, { guild_id: message.guild.id });
+            let m = await message.channel.send(`Following Tags are available for the guild '${message.guild}':\n\`${rows.map(i => i.tag).join(', ')}\``);
+            m.delete(15000);
+            return;
+        }
         if (tag === 'edit') {
             tag = args[1];
             let text = args.slice(2);

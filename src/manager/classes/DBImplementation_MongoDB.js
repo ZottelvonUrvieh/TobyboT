@@ -6,8 +6,6 @@ const DBInterface = require('./DBInterface');
 class MongoDBHandler extends DBInterface{
     constructor(bot) {
         super(bot);
-        this.bot = bot;
-
         // These are the required functions that the DBManager wants to have implemented
         // TODO: complete these functions!!
         this.disconnectDB           = function ()                      { };
@@ -27,10 +25,10 @@ class MongoDBHandler extends DBInterface{
         let mongodbDatabase = 'tobebot';
 
         if (this.local === false) {
-            let sets = this.setSettings(require('path').resolve(__dirname, 'mongoDB.conf'));
+            let sets = this.setSettings(require('path').resolve(__dirname, 'mongoDBConfig.js'));
             mongodbHost = sets.mongodbHost;
             mongodbPort = sets.mongodbPort;
-            authenticate = sets.authenticate;
+            authenticate = sets.authenticate + '@';
             mongodbDatabase = sets.mongodbDatabase;
         }
         // constructed connect string for mongodb server that works no matter if locally hosted or

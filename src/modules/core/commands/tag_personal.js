@@ -12,7 +12,7 @@ module.exports = {
 
         if (tag === 'list') {
             let rows = await this.bot.dbManager.getTableRowsByKey(table, { owner_id: message.author.id });
-            let m = await message.channel.send(`Following personal Tags are available for you ${message.author}:\n\`${rows.map(i => i.tag).join(', ')}\``);
+            let m = await message.channel.send(`Following personal Tags are available for you ${message.author.username}:\n\`${rows.map(i => i.tag).join(', ')}\``);
             m.delete(15000);
             return;
         }

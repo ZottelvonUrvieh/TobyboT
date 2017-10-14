@@ -3,10 +3,12 @@ module.exports = {
     run: async function (message, args) {
         // this code will get executed everytime the configured cmd or alias with the correct prefix is called
         // you have access to things like
-        this.debug('An example debug text for the console to show more information while in debug mode');
-        this.log('An example log for the console to show important information');
-        this.warn('Yeah... you get the point...');
-        this.error('I am still gonna list them all :P');
+
+        // this.debug('An example debug text for the console to show more information while in debug mode');
+        // this.log('An example log for the console to show important information');
+        // this.warn('Yeah... you get the point...');
+        // this.error('I am still gonna list them all :P');
+
         // they have a bit of sugar to them to keep the console clean and easy to understand which part of
         // the bot is causing what. (Colors + Code at the beginning + Name of Module + Command where it happend)
 

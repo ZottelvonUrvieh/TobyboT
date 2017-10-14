@@ -6,7 +6,6 @@ module.exports = {
 
     // Called when bot starts, before login into Discord, after the commands got loaded. One time only.
     init: function () {
-        this.log('in init');
         this.debug('In init!');
     },
 

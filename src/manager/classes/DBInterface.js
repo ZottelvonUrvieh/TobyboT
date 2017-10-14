@@ -11,12 +11,12 @@ class DBInterface  {
                 this.connectDB              = function ()                      { };
                 this.disconnectDB           = function ()                      { };
 
-                this.setSettings = function (file) { };
+                this.setSettings            = function (file) { };
 
                 // Get complete table
                 this.getTableRows           = function (table)                 { };
                 // Inserts multiple rows into a table - be sure to not to add duplicates!
-                this.insertTableRows           = function (table, rows)           { };
+                this.insertTableRows        = function (table, rows)           { };
                 // Delete complete table
                 this.deleteTable            = function (table)                 { };
                 // Get an Array of rows
@@ -27,7 +27,7 @@ class DBInterface  {
                 this.deleteTableRowsByKey   = function (table, key)            { };
 
                 this.local                  = false;
-                this.status = 'disconnected';
+                this.status                 = 'disconnected';
 
             }
         };

@@ -7,7 +7,7 @@ class LoggingManager {
             return bot.error(err, 'UNCAUGHT: ');
         });
         process.on('unhandledRejection', function (reason, p) {
-            if (reason && reason.name === 'DiscordAPIError' && reason.message === 'Missing Permissions')
+            if (reason && reason.name === 'DiscordAPIError')
                 return bot.discordDebug(reason + ' do do something! (Like deleting messages, kicking people, changing servers / roles etc.. for example)');
             else if (reason.stack)
                 return bot.error(reason.message + '   ' + reason.stack, `Promise ${p}: `);

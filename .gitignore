@@ -1,5 +1,6 @@
-# config file - don't wanna overwrite the example and show everyone my token eh? :P
+# config files - don't wanna overwrite the example and show everyone my token / db credentials eh? :P
 /config.cfg
+mongoDBConfig.js
 
 # Logs
 logs
