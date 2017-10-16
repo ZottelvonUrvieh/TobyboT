@@ -2,7 +2,7 @@
 class Module {
     constructor(path, bot) {
         this.debug = function (output) {
-            if (bot.debugFlags.indexOf('dependant') !== -1 && this.debugMode === true)
+            if (bot.settings.debugFlags.indexOf('dependant') !== -1 && this.debugMode === true)
                 bot.debug(`In ${this.toString()}: ${output}`);
         };
 
@@ -37,6 +37,7 @@ class Module {
             }
         }
         this.commands = [];
+        this.events = [];
         this.path = path;
         this.commandsPath = require('path').resolve(path, 'commands');
         this.eventsPath = require('path').resolve(path, 'events');

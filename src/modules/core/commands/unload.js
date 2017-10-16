@@ -1,11 +1,9 @@
 module.exports = {
     run: async function (message, args) {
-        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES') !== -1) message.delete(10000).catch(e => { });
         const m = await message.channel.send(`Trying to unload ${args[0]}`);
         let success = this.bot.commandManager.unloadCommandByName(args[0]);
         if (success === true) await m.edit(`Command ${args[0]} successfull unloaded!`);
         else await m.edit(`No command that listens on ${args[0]} found...`);
-        m.delete(5000);
     },
 
     configs: function () {
@@ -23,7 +21,7 @@ module.exports = {
         this.description = 'Unloads a command by the commands name (or alias).';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function () {
-            return `To unload a command do: \`${this.bot.prefix}${this.cmd} commandNameOrAlias\``;
+            return `To unload a command do: \`${this.bot.settings.prefix}${this.cmd} commandNameOrAlias\``;
         };
         // Makes the bot message how to use the command correctly if you throw an exception
         this.showUsageOnError = false;
@@ -35,5 +33,7 @@ module.exports = {
         this.debugMode = false;
         // If true the Command is only usable for the configured owners
         this.ownersOnly = true;
+        // If this is > 0 the event autoCleanup will delete user messages with this command after these amount of ms
+        this.autoDelete = 10000;
     }
 };

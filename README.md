@@ -34,7 +34,8 @@ But I started completely fresh and rewrote everything from scratch so that is wh
     - [x] CoreBot
     - [x] Module
     - [x] Command
-    - [ ] Events
+    - [ ] Discord Events
+    - [ ] Event System for timed / repeated tasks
 - [x] **ErrorHandler**
 - [ ] **Configuration manager**
   - [x] Initial config with prefix, bot-token, owners, etc

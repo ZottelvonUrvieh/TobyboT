@@ -1,12 +1,13 @@
 module.exports = {
     run: async function (message, args) {
-        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES') !== -1) message.delete(10000);
-        const m = await message.channel.send(`Setting the prefix to \`${args[0]}\``);
         let success = false;
-        if (args[0] && args[0].length > 0) success = this.bot.configManager.setPrefix(args[0]);
-        if (success === true) await m.edit(`Prefix successfully set to \`${args[0]}\`!`);
-        else await m.edit(`Was not able to successfully set Prefix to \`${args[0]}\``);
-        m.delete(5000);
+        if (args[0] && args[0].length > 0 && args[0] !== this.bot.settings.prefix) {
+            this.bot.configManager.updateConfig('prefix', args[0]);
+            this.bot.settings.prefix = args[0];
+            success = true;
+        }
+        if (success === true) message.channel.send(`Prefix successfully set to \`${args[0]}\`!`);
+        else message.channel.send(`Was not able to successfully set Prefix to \`${args[0]}\``);
     },
 
     configs: function () {
@@ -23,7 +24,7 @@ module.exports = {
         // Description for the help / menue
         this.description = 'Allows you to change the prefix the bot reacts to.';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
-        this.usage = function () { return `To change the prefix of the bot do: \`${this.bot.prefix}${this.cmd} newPrefix\``; };
+        this.usage = function () { return `To change the prefix of the bot do: \`${this.bot.settings.prefix}${this.cmd} newPrefix\``; };
         // Makes the bot message how to use the command correctly if you throw an exception
         this.showUsageOnError = false;
         // Decides where it will be listen in the help menue
@@ -34,5 +35,7 @@ module.exports = {
         this.debugMode = false;
         // If true the Command is only usable for the configured owners
         this.ownersOnly = true;
+        // If this is > 0 the event autoCleanup will delete user messages with this command after these amount of ms
+        this.autoDelete = 10000;
     }
 };

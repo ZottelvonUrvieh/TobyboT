@@ -38,10 +38,10 @@ class ModuleManager {
 
     addPermissions(mod) {
         let newPerms = mod.permissions.filter( perm => {
-            return this.bot.permissions.indexOf(perm) === -1;
+            return this.bot.settings.permissions.indexOf(perm) === -1;
         });
         if (newPerms.length === 0) return;
-        this.bot.permissions = this.bot.permissions.concat(newPerms);
+        this.bot.settings.permissions = this.bot.settings.permissions.concat(newPerms);
         this.bot.coreDebug(` Adding permissions due to Module ${mod.name} settings: ${newPerms} `);
     }
 
@@ -54,7 +54,7 @@ class ModuleManager {
      */
     removeUnneededPermissions(mod) {
         // Heck... can someone plz make this shorter? I am too lazy rn and it works... :D
-        let neededPerms = this.bot.defaultPermissions;
+        let neededPerms = this.bot.settings.defaultPermissions;
         this.modules.forEach(function(module) {
             if (mod === module) return;
             module.permissions.forEach( perm => {
@@ -68,12 +68,12 @@ class ModuleManager {
             },this);
         }, this);
 
-        let removedPerms = this.bot.permissions.filter(perm =>{
+        let removedPerms = this.bot.settings.permissions.filter(perm =>{
             return neededPerms.indexOf(perm) === -1;
         });
         if (removedPerms.length === 0) return;
         this.bot.coreDebug(`Removing unneeded permissions because of unloading ${mod}: [${removedPerms}]`);
-        this.bot.permissions = neededPerms;
+        this.bot.settings.permissions = neededPerms;
     }
 
     unloadModuleByID(modID) {
@@ -92,7 +92,7 @@ class ModuleManager {
     reloadModule(mod) {
         this.unloadModuleByID(mod.id);
         let newMod = this.indexModule(mod.path);
-        this.bot.commandManager.loadCommands(newMod);
+        this.bot.commandManager.loadCommandsAndEvents(newMod);
         return newMod;
     }
 
@@ -102,14 +102,17 @@ class ModuleManager {
         this.bot.coreDebug(`Reloading module with path ${path}`);
         if (this.isDirectory(path)) {
             let mod = this.indexModule(path);
-            this.bot.commandManager.loadCommands(mod);
+            this.bot.commandManager.loadCommandsAndEvents(mod);
             return mod;
         }
         this.bot.error(`Was not able to reload Mod with ID ${modID}... Have you deleted or renamed the folder?`);
         return false;
     }
 
-    reloadAllModules () {
+    reloadAllModules() {
+        this.bot.commandManager.events.forEach(function(e) {
+            e.eject();
+        }, this);
         this.bot.moduleManager = new ModuleManager(this.bot);
         this.bot.commandManager = new CommandManager(this.bot);
         return 'Everything ';

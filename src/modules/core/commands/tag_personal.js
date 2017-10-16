@@ -1,6 +1,5 @@
 module.exports = {
     run: async function (message, args) {
-        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES') !== -1) message.delete(10000);
         let tag = args[0];
         // Define options of the table to use:
         let table = {
@@ -12,8 +11,7 @@ module.exports = {
 
         if (tag === 'list') {
             let rows = await this.bot.dbManager.getTableRowsByKey(table, { owner_id: message.author.id });
-            let m = await message.channel.send(`Following personal Tags are available for you ${message.author.username}:\n\`${rows.map(i => i.tag).join(', ')}\``);
-            m.delete(15000);
+            message.channel.send(`Following personal Tags are available for you ${message.author.username}:\n\`${rows.map(i => i.tag).join(', ')}\``);
             return;
         }
         else if (tag === 'edit') {
@@ -22,8 +20,7 @@ module.exports = {
             // insert/update row in the table containing the tag owners id, the tagname and the tagtext
             if (text.length === 0) {
                 this.bot.dbManager.deleteTableRowsByKey(table, { owner_id: message.author.id, tag: tag });
-                let m = await message.channel.send(`Alright! Your personal tag ${tag} was deleted :ok_hand:`);
-                m.delete(5000);
+                message.channel.send(`Alright! Your personal tag ${tag} was deleted :ok_hand:`);
                 return;
             }
             this.bot.dbManager.setTableRowByKey(
@@ -31,8 +28,7 @@ module.exports = {
                 { owner_id: message.author.id, tag: tag },
                 { text: text.join(' ') }
             );
-            let m = await message.channel.send(`Alright! Your input was saved to your personal tag ${tag} :ok_hand:`);
-            m.delete(5000);
+            message.channel.send(`Alright! Your input was saved to your personal tag \`${tag}\` :ok_hand:`);
             return;
         }
         let rows = await this.bot.dbManager.getTableRowsByKey(table, { owner_id: message.author.id, tag:tag });
@@ -55,8 +51,9 @@ module.exports = {
         this.description = 'Make your own awesome personal tags that only you can use on any server the bot is on!';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function () {
-            return  `Create/edit tags with: \`${this.bot.prefix}${this.cmd} edit nameOfTheTag This is some cool text.\`\n` +
-                    `Show a tag with: \`${this.bot.prefix}${this.cmd} nameOfTheTag\``;
+            return  `Create / edit tags: \`\`\`${this.bot.settings.prefix}${this.cmd} edit nameOfTheTag This is some cool text.\`\`\`` +
+                    `To delete tags leave the text empty: \`\`\`${this.bot.settings.prefix}${this.cmd} edit nameOfTheTag\`\`\`` +
+                    `Show a tag with: \`\`\`${this.bot.settings.prefix}${this.cmd} nameOfTheTag\`\`\``;
         };
         // Makes the bot message how to use the command correctly if you throw an exception
         this.showUsageOnError = false;
@@ -68,5 +65,7 @@ module.exports = {
         this.debugMode = false;
         // If true the Command is only usable for the configured owners
         this.ownersOnly = false;
+        // If this is > 0 the event autoCleanup will delete user messages with this command after these amount of ms
+        this.autoDelete = 10000;
     }
 };

@@ -6,12 +6,21 @@ class Command {
         let fileName = require('path').resolve(filePath);
         delete require.cache[fileName];
         this.commandData = require(fileName);
-        this.configs = this.commandData.configs;
         // set all the configs (this is kinda hacky to get access to 'this' in configs ^^)
+        for (let param in this.commandData) {
+            if (this.commandData.hasOwnProperty(param)) {
+                this[param] = this.commandData[param];
+            }
+        }
         this.configs();
-        this.run = this.commandData.run;
+
+        // this is pretty much the only difference between a command and a event
+        if (this.commandData.run) this.run = this.commandData.run;
+        if (this.commandData.inject) this.inject = this.commandData.inject;
+        if (this.commandData.eject) this.eject = this.commandData.eject;
+
         this.debug = function (output) {
-            if (bot.debugFlags.indexOf('dependant') !== -1 && (this.debugMode === true || this.mod.debugMode === true))
+            if (bot.settings.debugFlags.indexOf('dependant') !== -1 && (this.debugMode === true || this.mod.debugMode === true))
                 bot.debug(output, `${this.toLog()}: `);
         };
         this.log = function (output) {

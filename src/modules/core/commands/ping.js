@@ -1,10 +1,8 @@
 module.exports = {
     run: async function (message, ) {
-        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES') !== -1) message.delete(3000);
         let m = await message.channel.send(':thinking: Ping');
         m = await m.edit(':thinking: Ping...');
         await m.edit(`:bulb: Pong! My responsiness is round about ${m.editedTimestamp - m.createdTimestamp}ms.`);
-        m.delete(5000);
     },
 
     configs: function () {
@@ -22,7 +20,7 @@ module.exports = {
         this.description = 'Gets feedback about the ping of the bot.';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function() {
-            return `Just do: \`${this.bot.prefix}${this.cmd}\``;
+            return `Just do: \`${this.bot.settings.prefix}${this.cmd}\``;
         };
         // Makes the bot message how to use the command correctly if you throw an exception
         this.showUsageOnError = false;
@@ -34,5 +32,7 @@ module.exports = {
         this.debugMode = true;
         // If true the Command is only usable for the configured owners
         this.ownersOnly = false;
+        // If this is > 0 the event autoCleanup will delete user messages with this command after these amount of ms
+        this.autoDelete = 10000;
     }
 };

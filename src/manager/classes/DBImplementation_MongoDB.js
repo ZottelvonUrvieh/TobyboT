@@ -18,22 +18,10 @@ class MongoDBHandler extends DBInterface{
     setup() {
         this.db = mongoose.connection;
         this.db.on('error', err => this.error(err));
+        // Use a local hosted
+        if (this.local === true)
+            this.bot.settings.mongoDBurl = this.bot.settings.mongoDBurl_local;
 
-        let mongodbHost = 'localhost';
-        let mongodbPort = '27017';
-        let authenticate = '';
-        let mongodbDatabase = 'tobebot';
-
-        if (this.local === false) {
-            let sets = this.setSettings(require('path').resolve(__dirname, 'mongoDBConfig.js'));
-            mongodbHost = sets.mongodbHost;
-            mongodbPort = sets.mongodbPort;
-            authenticate = sets.authenticate + '@';
-            mongodbDatabase = sets.mongodbDatabase;
-        }
-        // constructed connect string for mongodb server that works no matter if locally hosted or
-        // remote as it changes depending on the this.local variable
-        this.mongoDBurl = 'mongodb://' + authenticate + mongodbHost + ':' + mongodbPort + '/' + mongodbDatabase;
         this.connectDB();
     }
 
@@ -46,7 +34,7 @@ class MongoDBHandler extends DBInterface{
         if (this.db._readyState === 1 || this.db._readyState === 2)
             return;
         this.log('Connecting to MongoDB...');
-        mongoose.connect(this.mongoDBurl, { useMongoClient: true }).catch(() => { }); // we handle errors with the function: this.db.on
+        mongoose.connect(this.bot.settings.mongoDBurl, { useMongoClient: true }).catch((e) => {this.warn(e); }); // we handle errors with the function: this.db.on
         this.db.once('open', function () {
             this.log('Successfully connected to MongoDB.');
         }.bind(this));

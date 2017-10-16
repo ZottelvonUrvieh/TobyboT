@@ -1,6 +1,10 @@
 const chalk = require('chalk');
 class LoggingManager {
     constructor(bot) {
+        // simple error handling - also move that into event folders like the todo below
+        bot.on('error', (e) => bot.error(e.stack));
+        bot.on('warn', (e) => bot.warn(e));
+        bot.on('debug', (e) => bot.discordDebug(e));
         process.on('uncaughtException', function (err) {
             if (err.stack)
                 return bot.error(err.stack, 'UNCAUGHT: ');
@@ -14,6 +18,25 @@ class LoggingManager {
             return bot.error(reason, `Promise ${p}: `);
         });
 
+        // TODO: Make these into files in core/event folder currently it should create duplicates
+        //       if you would use the reload command multiple times...
+        // Seems to never fire... maybe remove it?
+        bot.on('disconnect', () => {
+            this.bot.warn('Disconnected from Discord!');
+            this.bot.moduleManager.disconnectCalls();
+        });
+
+        bot.on('resume', () => {
+            this.bot.warn('Resumed Discord!');
+            // bot.moduleManager.disconnectCalls();
+        });
+
+        bot.on('reconnecting', () => {
+            this.bot.warn('Reconnecting Discord!');
+            // bot.moduleManager.disconnectCalls();
+        });
+
+        // beautify the logging options
         bot.log = this.log;
         bot.error = this.error;
         bot.warn = this.warn;
@@ -33,8 +56,6 @@ class LoggingManager {
             chalk.magenta   (chalk.bold('[C]') + ' Bot-Core debug \n')
         );
         bot.log('Starting up the bot...');
-        bot.log(`Bot Prefix is set to: '${bot.prefix}'`);
-        bot.coreDebug(`Bot debug flags are set to: [${bot.debugFlags.join(', ')}]`);
     }
 
     loggify(symbol, output = '') {
@@ -61,7 +82,7 @@ class LoggingManager {
     }
 
     discordDebug(output, label = '') {
-        if (['true', 'discord'].some(e => this.debugFlags.indexOf(e) !== -1)) {
+        if (['true', 'discord'].some(e => this.settings.debugFlags.indexOf(e) !== -1)) {
             return process.stdout.write(chalk.cyan(this.loggify('[D]', label + output)));
         }
     }
@@ -71,7 +92,7 @@ class LoggingManager {
     }
 
     coreDebug(output, label = '') {
-        if (this.debugFlags.indexOf('core') !== -1) {
+        if (this.settings.debugFlags.indexOf('core') !== -1) {
             return process.stdout.write(chalk.magenta(this.loggify('[C]', label + output)));
         }
     }

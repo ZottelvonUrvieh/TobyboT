@@ -1,6 +1,5 @@
 module.exports = {
     run: async function (message, args) {
-        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES') !== -1) message.delete(10000);
         let m, success;
         switch (args.length) {
         case 0:
@@ -23,9 +22,8 @@ module.exports = {
         }
 
         if (success)
-            await m.edit(`${m.content}\n'${success}' successfully reloaded!`);
-        else await m.edit(`${m.content}\nBut nothing that listens on that was found...`);
-        m.delete(10000);
+            m.edit(`${m.content}\n'${success}' successfully reloaded!`);
+        else m.edit(`${m.content}\nBut nothing that listens on that was found...`);
     },
 
     configs: function () {
@@ -43,8 +41,8 @@ module.exports = {
         this.description = 'Reloads a command or module by the commands name (or alias).';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function () {
-            return `To reload a command: \`${this.bot.prefix}${this.cmd} command\`` +
-                `\nTo reload a module: \`${this.bot.prefix}${this.cmd} mod moduleID\``;
+            return `To reload a command: \`${this.bot.settings.prefix}${this.cmd} command\`` +
+                `\nTo reload a module: \`${this.bot.settings.prefix}${this.cmd} mod moduleID\``;
         };
         // Makes the bot message how to use the command correctly if you throw an exception
         this.showUsageOnError = false;
@@ -56,5 +54,7 @@ module.exports = {
         this.debugMode = false;
         // If true the Command is only usable for the configured owners
         this.ownersOnly = true;
+        // If this is > 0 the event autoCleanup will delete user messages with this command after these amount of ms
+        this.autoDelete = 10000;
     }
 };

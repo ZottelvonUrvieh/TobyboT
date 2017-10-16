@@ -6,7 +6,7 @@
     "start": "node src/bot.js",
     "lint": "eslint \"src/**\""
   },
-  "repository": "git@github.com:ZottelvonUrvieh/tobebot.git",
+  "repository": "git@github.com:ZottelvonUrvieh/tobybot.git",
   "author": "SnoopSySpoonS <benkosmann@gmail.com>",
   "license": "MIT",
   "devDependencies": {
@@ -15,7 +15,6 @@
   "dependencies": {
     "chalk": "^1.1.3",
     "discord.js": "^11.2.1",
-    "lowdb": "^1.0.0",
     "mongodb": "^2.2.31",
     "mongoose": "^4.12.1"
   }

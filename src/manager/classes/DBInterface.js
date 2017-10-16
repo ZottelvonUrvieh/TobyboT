@@ -3,7 +3,7 @@ class DBInterface  {
     constructor(bot) {
         // Define which properties has to be set and what their arguments have to be called (ordered)
         // (to avoid wrong order of arguments throwing errors)
-
+        this.bot = bot;
         // ?: Should I also define what they should return? Like that setter should return a
         // ?: resolvable promise<boolean> to have a respond if the insert/update worked?
         this.delegates = new class {

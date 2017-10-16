@@ -1,4 +1,4 @@
-function generateMessages (headString, footerString, items, detailed) {
+function generateMessages(headString, footerString, items, detailed) {
     let itemStrings = [];
     let msgsStrings = [];
 
@@ -13,21 +13,19 @@ function generateMessages (headString, footerString, items, detailed) {
     for (let index = 0; index < itemStrings.length; index++) {
         let itemString = `\n${itemStrings[index]}\nㅤ`;
         let cString = msgsStrings.pop();
-        if (index < itemStrings.length - 1) {
-            if (cString.length + itemString.length < 2000)
-                msgsStrings.push(cString + itemString);
-            else {
-                msgsStrings.push(cString);
-                msgsStrings.push(itemString);
-            }
-        }
+        if (cString.length + itemString.length < 2000)
+            msgsStrings.push(cString + itemString);
         else {
-            if (cString.length + footerString.length < 2000)
-                msgsStrings.push(cString + footerString);
-            else {
-                msgsStrings.push(cString);
-                msgsStrings.push(footerString);
-            }
+            msgsStrings.push(cString);
+            msgsStrings.push(itemString);
+        }
+        if (index < itemStrings.length - 1) continue;
+        cString = msgsStrings.pop();
+        if (cString.length + footerString.length < 2000)
+            msgsStrings.push(cString + footerString);
+        else {
+            msgsStrings.push(cString);
+            msgsStrings.push(footerString);
         }
     }
     return msgsStrings;
@@ -35,13 +33,13 @@ function generateMessages (headString, footerString, items, detailed) {
 
 async function displayGeneralHelp(message, cmd) {
     let headString = '**Currently loaded Bot-Modules**\n';
-    let footerString = `ㅤ\nTo get more information about the individual modules use \`${cmd.bot.prefix}${cmd.cmd} moduleID\`ㅤ`;
+    let footerString = `ㅤ\nTo get more information about the individual modules use \`${cmd.bot.settings.prefix}${cmd.cmd} moduleID\`ㅤ`;
 
     // Generate all the text for the (possibly) multiple messages
     let msgsStrings = generateMessages(headString, footerString, cmd.bot.moduleManager.modules, false);
 
     // Send all messages and delete them after 60 seconds.
-    msgsStrings.map(async msgSring => { return await message.channel.send(msgSring).then(m => m.delete(60000)); });
+    msgsStrings.map(async msgSring => { return await message.channel.send(msgSring); });
     return true;
 }
 
@@ -49,13 +47,13 @@ async function displayModuleHelp(message, id, cmd) {
     let mod = cmd.bot.moduleManager.getModuleByID(id);
     if (!mod) return false;
     let headString =  `${mod.help()} \n\n**This mod includes the commands:**\n`;
-    let footerString = `ㅤ\nTo get more information about the individual Commands use \`${cmd.bot.prefix}${cmd.cmd} commandOrAlias\`ㅤ`;
+    let footerString = `ㅤ\nTo get more information about the individual Commands use \`${cmd.bot.settings.prefix}${cmd.cmd} commandOrAlias\`ㅤ`;
 
     // Generate all the text for the (possibly) multiple messages
     let msgsStrings = generateMessages(headString, footerString, mod.commands, false);
 
     // Send all messages and delete them after 60 seconds.
-    msgsStrings.map(async msgSring => { return await message.channel.send(msgSring).then(m => m.delete(60000)); });
+    msgsStrings.map(async msgSring => { return await message.channel.send(msgSring); });
     return true;
 }
 
@@ -63,13 +61,12 @@ async function displayCommandHelp(message, callable, cmd) {
     cmd = cmd.bot.commandManager.getCommandByCallable(callable);
     if (!cmd) return false;
     // Generate all the text for the (possibly) multiple messages
-    await message.channel.send(cmd.help(true)).then(m => m.delete(60000));
+    message.channel.send(cmd.help(true));
     return true;
 }
 
 module.exports = {
     run: async function (message, args) {
-        if (this.mod.permissions.concat(this.permissions).indexOf('MANAGE_MESSAGES') !== -1) message.delete(10000);
         let success;
         if (args.length === 0) {
             success = await displayGeneralHelp(message, this);
@@ -82,8 +79,7 @@ module.exports = {
         }
         if (success) return;
         // TODO: Throw an error and add the feature of then showing usage insead of doing this.
-        let m = await message.channel.send(`Nothing found... what do you mean with \`${args[0]}\`?`);
-        return m.delete(60000);
+        message.channel.send(`Nothing found... what do you mean with \`${args[0]}\`?`);
     },
 
     // all settings but cmd and location are optional - the other are just to increase useability
@@ -108,9 +104,9 @@ module.exports = {
         this.description = 'Can give an overview what commands are available and what they do.';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function() {
-            return  `General help: \`${this.bot.prefix}${this.cmd}\`\n` +
-                    `Module specific help: \`${this.bot.prefix}${this.cmd} moduleID\`` +
-                    `Command specific help: \`${this.bot.prefix}${this.cmd} commandName\``;
+            return  `General help: \`${this.bot.settings.prefix}${this.cmd}\`\n` +
+                    `Module specific help: \`${this.bot.settings.prefix}${this.cmd} moduleID\`` +
+                    `Command specific help: \`${this.bot.settings.prefix}${this.cmd} commandName\``;
         };
         // Makes the bot message how to use the command correctly if you throw an exception
         this.showUsageOnError = false;
@@ -122,5 +118,7 @@ module.exports = {
         this.debugMode = true;
         // If true the Command is only usable for the configured owners
         this.ownersOnly = false;
+        // If this is > 0 the event autoCleanup will delete user messages with this command after these amount of ms
+        this.autoDelete = 10000;
     }
 };

@@ -6,7 +6,6 @@ module.exports = {
 
     // Called when bot starts, before login into Discord, after the commands got loaded. One time only.
     init: function () {
-        this.log('in init');
         this.debug('In init!');
     },
 
@@ -28,6 +27,7 @@ module.exports = {
     // Called when the bot disconnects from Discord - carefull! This might be called less often than connect!
     disconnect: function () {
         this.debug('In disconnect!');
+        this.log('In disconnect!');
     },
 
     // General configs for the Module

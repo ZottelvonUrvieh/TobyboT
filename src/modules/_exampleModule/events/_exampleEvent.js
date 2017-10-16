@@ -1,19 +1,17 @@
 module.exports = {
-    inject: function(bot) {
+    inject: function (bot) {
         bot.on('message', () => {
             bot.log('Got a message Master!');
         });
     },
 
-    config: {
-        name: 'Message event',
-        cmd: 'load',
-        alias: ['l'],
-        permissions: [],
-        location: 'ALL',
-        description: 'Loads a command by the commands name (or alias).',
-        debugMode: true,
-        category: 'Debug',
-        tags: ['Core', 'Debugging']
+    configs: function () {
+        this.name = 'Message event';
+        this.permissions = [];
+        this.location = 'ALL';
+        this.description = 'Runs every time a message is written in any guild the Bot is on.';
+        this.debugMode = true;
+        this.category = 'Debug';
+        this.tags = ['Core', 'Debugging'];
     }
 };

@@ -1,5 +1,5 @@
 const { readdirSync } = require('fs');
-const { join } = require('path');
+const path = require('path');
 const Command = require('./classes/Command.js');
 const chalk = require('chalk');
 
@@ -7,28 +7,30 @@ class CommandManager {
     constructor(bot) {
         this.bot = bot;
         this.commands = [];
+        this.events = [];
         // initialize all the modules and their commands
         bot.moduleManager.modules.map(mod => {
             bot.log(`Loading commands of module '${mod.name}'`);
-            this.loadCommands(mod);
+            this.loadCommandsAndEvents(mod);
             if (mod.init) mod.init();
         });
     }
 
     // load all commands of a mod
-    loadCommands(mod)  {
-        const isJSFile = source => require('path').extname(source) === '.js';
+    loadCommandsAndEvents(mod)  {
+        const isJSFile = source => path.extname(source) === '.js';
         const getCommandFiles = source =>
             readdirSync(source).map(name => {
                 if (name.startsWith('_')) return '';
-                return join(source, name);
+                return path.join(source, name);
             }).filter(isJSFile);
 
         getCommandFiles(mod.commandsPath).map(commandFile => this.loadCommand(commandFile, mod));
+        getCommandFiles(mod.eventsPath).map(eventFile => this.loadEvent(eventFile, mod));
     }
 
     loadCommand(commandFile, mod) {
-        this.bot.coreDebug(`Loading: ${require('path').basename(commandFile)} from Modulefolder ${mod.id}... `);
+        this.bot.coreDebug(`Loading command: ${path.basename(commandFile)} from Modulefolder ${mod.id}... `);
         let command = new Command(commandFile, mod, this.bot);
         if (!command) return false;
         if (this.manageDuplicates(command) === false) {
@@ -41,6 +43,26 @@ class CommandManager {
         return true;
     }
 
+    loadEvent(eventFile, mod) {
+        this.bot.coreDebug(`Loading event: ${path.basename(eventFile)} from Modulefolder ${mod.id}... `);
+        let event = new Command(eventFile, mod, this.bot);
+        if (!event) return false;
+        this.addPermissions(event);
+        this.events.push(event);
+        mod.events.push(event);
+        event.inject();
+        process.stdout.write(chalk.magenta(`DONE! ${event} is loaded!`));
+        return true;
+    }
+
+    ejectAllEvents() {
+        this.bot.moduleManager.modules.forEach(function(mod) {
+            mod.events.forEach(function(event) {
+                event.eject();
+            }, this);
+        }, this);
+    }
+
     /**
      * Requires the module that contains the command to be loaded/indexed
      *
@@ -51,11 +73,11 @@ class CommandManager {
         if (this.getCommandByCallable(commandName)) return false; // command already loaded
         let mod = this.bot.moduleManager.getModuleByFolderName(moduleFolderName);
         if (!mod) return;
-        const isJSFile = source => require('path').extname(source) === '.js';
+        const isJSFile = source => path.extname(source) === '.js';
         const getCommandFiles = source =>
             readdirSync(source).map(name => {
                 if (name.startsWith('_')) return __filename;
-                return join(source, name);
+                return path.join(source, name);
             }).filter(isJSFile);
 
         getCommandFiles(mod.commandsPath).map(commandFile => {
@@ -161,10 +183,10 @@ class CommandManager {
 
     addPermissions(cmd) {
         let newPerms = cmd.permissions.filter( perm => {
-            return this.bot.permissions.indexOf(perm) === -1;
+            return this.bot.settings.permissions.indexOf(perm) === -1;
         });
         if (newPerms.length === 0) return;
-        this.bot.permissions = this.bot.permissions.concat(newPerms);
+        this.bot.settings.permissions = this.bot.settings.permissions.concat(newPerms);
         this.bot.coreDebug(` Adding permissions due to ${cmd} settings: ${newPerms} `);
     }
 
@@ -189,25 +211,33 @@ class CommandManager {
         return false;
     }
 
-    async parseCommand(msg) {
-        if (msg.content.startsWith(this.bot.prefix) === false) return;
+    parseMsgToCommand(msg) {
+        if (msg.author.bot) return false;
+        if (msg.content.startsWith(this.bot.settings.prefix) === false) return false;
 
-        const args = msg.content.slice(this.bot.prefix.length).trim().split(/ +/g);
+        const args = msg.content.slice(this.bot.settings.prefix.length).trim().split(/ +/g);
         const cmdName = args.shift();//.toLowerCase(); maybe want to do this...
-
         let cmd = this.getCommandByCallable(cmdName);
-        if (!cmd) return;
+        this.bot.coreDebug(cmd);
+        return { cmd, msg, args };
+    }
 
+    async runCommand(cmdMsgArgs) {
+        if (!cmdMsgArgs.cmd) return false;
         // Check ownership only mode and if msg author is owner
-        if ((cmd.ownersOnly || cmd.mod.ownersOnly) && this.bot.owners.indexOf(msg.author.id) === -1)
-            return;
+        if ((cmdMsgArgs.cmd.ownersOnly || cmdMsgArgs.cmd.mod.ownersOnly) &&
+            this.bot.settings.owners.indexOf(cmdMsgArgs.msg.author.id) === -1)
+            return false;
         // Check if this command should be executed in this channel ~ depending on cmd settings
-        if (cmd.location.indexOf(msg.channel.type) === -1)
-            return;
-        let error = await cmd.run(msg, args);
-        if (error instanceof Error) {
-            if (cmd.showUsageOnError) msg.channel.send(`**Something went wrong:**\n\`${error.message}\`\n\n${cmd.usage()}`);
-            cmd.error(error);
+        if (cmdMsgArgs.cmd.location.indexOf(cmdMsgArgs.msg.channel.type) === -1)
+            return false;
+        if (cmdMsgArgs) {
+            let error = await cmdMsgArgs.cmd.run(cmdMsgArgs.msg, cmdMsgArgs.args);
+            if (error instanceof Error) {
+                if (cmdMsgArgs.cmd.showUsageOnError)
+                    cmdMsgArgs.msg.channel.send(`**Something went wrong:**\n\`${error.message}\`\n\n${cmdMsgArgs.cmd.usage()}`);
+                cmdMsgArgs.cmd.error(error);
+            }
         }
     }
 }
