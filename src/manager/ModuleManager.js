@@ -1,7 +1,7 @@
 const { lstatSync, readdirSync } = require('fs');
 const { join } = require('path');
 const Module = require('./classes/Module.js');
-const CommandManager = require('./CommandManager');
+const ComponentManager = require('./ComponentManager');
 
 class ModuleManager {
     constructor(bot) {
@@ -46,8 +46,8 @@ class ModuleManager {
     }
 
     /**
-     * This can acutally take either take a module or a command and removes the permissions that
-     * are only needed for that module/command
+     * This can acutally take either take a module or a component and removes the permissions from
+     * the bot which are only needed for that module/command
      *
      * @param {Module|Command} mod
      * @memberof ModuleManager
@@ -80,7 +80,7 @@ class ModuleManager {
         for (let index = 0; index < this.modules.length; index++) {
             let mod = this.modules[index];
             if (mod.id === modID) {
-                this.bot.commandManager.unloadModuleCommands(mod);
+                this.bot.componentManager.unloadModuleCommands(mod);
                 mod.module_unload();
                 this.modules.splice(index, 1);
                 return true;
@@ -92,7 +92,7 @@ class ModuleManager {
     reloadModule(mod) {
         this.unloadModuleByID(mod.id);
         let newMod = this.indexModule(mod.path);
-        this.bot.commandManager.loadCommandsAndEvents(newMod);
+        this.bot.componentManager.loadCommandsAndEvents(newMod);
         return newMod;
     }
 
@@ -102,7 +102,7 @@ class ModuleManager {
         this.bot.coreDebug(`Reloading module with path ${path}`);
         if (this.isDirectory(path)) {
             let mod = this.indexModule(path);
-            this.bot.commandManager.loadCommandsAndEvents(mod);
+            this.bot.componentManager.loadCommandsAndEvents(mod);
             return mod;
         }
         this.bot.error(`Was not able to reload Mod with ID ${modID}... Have you deleted or renamed the folder?`);
@@ -110,11 +110,11 @@ class ModuleManager {
     }
 
     reloadAllModules() {
-        this.bot.commandManager.events.forEach(function(e) {
+        this.bot.componentManager.events.forEach(function(e) {
             e.eject();
         }, this);
         this.bot.moduleManager = new ModuleManager(this.bot);
-        this.bot.commandManager = new CommandManager(this.bot);
+        this.bot.componentManager = new ComponentManager(this.bot);
         return 'Everything ';
     }
 

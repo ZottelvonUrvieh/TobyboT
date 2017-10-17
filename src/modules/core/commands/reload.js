@@ -8,7 +8,7 @@ module.exports = {
             break;
         case 1:
             m = await message.channel.send(`Trying to reload Command ${args[0]}...`);
-            success = this.bot.commandManager.reloadCommandByCallable(args[0]);
+            success = this.bot.componentManager.reloadCommandByCallable(args[0]);
             break;
         case 2:
             m = await message.channel.send(`Trying to reload Module ${args[1]}...`);

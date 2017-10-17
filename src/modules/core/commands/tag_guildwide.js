@@ -27,10 +27,10 @@ module.exports = {
                 // insert/update row in the table containing the guild id, the tagname and the tagtext
                 this.bot.dbManager.setTableRowByKey(
                     table,
-                    { guild_id: message.guild.id, owner_id: message.author.id, tag: text[0] },
-                    { text: text.slice(1).join(' ') }
+                    { guild_id: message.guild.id, owner_id: message.author.id, tag: tag },
+                    { text: text.join(' ') }
                 );
-                message.channel.send(`Alright! Your input was saved to the guildwide tag \`${text[0]}\` :ok_hand:`);
+                message.channel.send(`Alright! Your input was saved to the guildwide tag \`${tag}\` :ok_hand:`);
             }
             return;
         }

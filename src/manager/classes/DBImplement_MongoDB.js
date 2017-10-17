@@ -6,19 +6,18 @@ const DBInterface = require('./DBInterface');
 class MongoDBHandler extends DBInterface{
     constructor(bot) {
         super(bot);
-        // These are the required functions that the DBManager wants to have implemented
-        // TODO: complete these functions!!
-        this.disconnectDB           = function ()                      { };
+        // TODO: do we require a disconnect?
+        this.disconnectDB = function () { };
 
-        this.local                  = false;
-        this.tables                 = {};
+        this.local  = false;
+        this.tables = {};
 
         this.setup();
     }
     setup() {
         this.db = mongoose.connection;
         this.db.on('error', err => this.error(err));
-        // Use a local hosted
+        // Use a local hosted DB
         if (this.local === true)
             this.bot.settings.mongoDBurl = this.bot.settings.mongoDBurl_local;
 

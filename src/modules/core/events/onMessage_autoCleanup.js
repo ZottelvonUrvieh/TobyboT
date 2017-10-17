@@ -1,8 +1,5 @@
 function run(msg) {
-    // pretty much the same as in the command section... so go read that if you haven't already...
-    // only difference is that access to the eventObject is not 'this' but self
-    // this accesses the actual EventEmitter - which in this case is the Discord Client object - named bot in this project
-    let cmdMsgArgs = this.commandManager.parseMsgToCommand(msg);
+    let cmdMsgArgs = this.componentManager.parseMsgToCommand(msg);
     if (msg.author.id === this.user.id && self.forceMode !== 2 && self.botMsgTime > 0)
         return msg.delete(self.botMsgTime);
     if (!cmdMsgArgs) return;

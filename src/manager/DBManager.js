@@ -1,4 +1,4 @@
-const DBImplement = require('./classes/DBImplementation_MongoDB');
+const DBImplement = require('./classes/DBImplement_MongoDB');
 // TODO: implement this? Or naw?
 // const DBHandler2 = require('./classes/LowDBHandler'); // fallback
 class DBManager extends DBImplement {

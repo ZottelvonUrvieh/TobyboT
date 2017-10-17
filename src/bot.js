@@ -2,7 +2,7 @@ const discordjs = require('discord.js');
 const LoggingManager = require('./manager/LoggingManager');
 const ConfigManager = require('./manager/ConfigManager');
 const ModuleManager = require('./manager/ModuleManager');
-const CommandManager = require('./manager/CommandManager');
+const ComponentManager = require('./manager/ComponentManager');
 const DBManager = require('./manager/DBManager');
 
 // Discord client
@@ -12,7 +12,7 @@ const bot = new discordjs.Client({autoReconnect:true});
 bot.loggingManager = new LoggingManager(bot);
 bot.configManager = new ConfigManager(bot);
 bot.moduleManager = new ModuleManager(bot);
-bot.commandManager = new CommandManager(bot);
+bot.componentManager = new ComponentManager(bot);
 bot.dbManager = new DBManager(bot);
 
 bot.log('Waiting for bot to log in...');

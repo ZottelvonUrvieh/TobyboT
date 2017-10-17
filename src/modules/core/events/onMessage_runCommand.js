@@ -1,9 +1,6 @@
 function run(msg) {
-    // pretty much the same as in the command section... so go read that if you haven't already...
-    // only difference is that access to the eventObject is not 'this' but self
-    // this accesses the actual EventEmitter - which in this case is the Discord Client object - named bot in this project
-    let cmdMsgArgs = this.commandManager.parseMsgToCommand(msg);
-    this.commandManager.runCommand(cmdMsgArgs);
+    let cmdMsgArgs = this.componentManager.parseMsgToCommand(msg);
+    this.componentManager.runCommand(cmdMsgArgs);
 }
 
 

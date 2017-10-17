@@ -15,11 +15,6 @@ module.exports = {
         this.bot.on('error', this.error);
         this.bot.on('warn', this.warn);
         this.bot.on('debug', this.bot.discordDebug);
-        // This doesn't seem to fire... maye it's because of the auto reconnect option?
-        this.bot.on('disconnect', this.bot.moduleManager.disconnectCalls);
-        // Not yet used... maybe one of these is the one that should be used insead of 'disconnect'?
-        // this.bot.on('resume', this.error);
-        // this.bot.on('reconnecting', this.error);
 
         process.on('uncaughtException', rejectOrErrFilterDiscord);
         process.on('unhandledRejection', rejectOrErrFilterDiscord);
@@ -28,10 +23,6 @@ module.exports = {
         this.bot.removeListener('error', this.error);
         this.bot.removeListener('warn', this.warn);
         this.bot.removeListener('debug', this.bot.discordDebug);
-        this.bot.removeListener('disconnect', this.bot.moduleManager.disconnectCalls);
-        // Not yet used... (see above)
-        // this.bot.removeListener('resume', this.debug);
-        // this.bot.removeListener('reconnecting', this.debug);
         process.removeListener('uncaughtException', rejectOrErrFilterDiscord);
         process.removeListener('unhandledRejection', rejectOrErrFilterDiscord);
     },

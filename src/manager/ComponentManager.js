@@ -1,101 +1,142 @@
-const { readdirSync } = require('fs');
+const fs = require('fs');
 const path = require('path');
-const Command = require('./classes/Command.js');
+const Command = require('./classes/Module_ModuleComponent_Command');
+const Event = require('./classes/Module_ModuleComponent_Event');
+const Task = require('./classes/Module_ModuleComponent_Task');
 const chalk = require('chalk');
 
-class CommandManager {
+class ComponentManager {
     constructor(bot) {
         this.bot = bot;
         this.commands = [];
         this.events = [];
+        this.tasks = [];
         // initialize all the modules and their commands
         bot.moduleManager.modules.map(mod => {
             bot.log(`Loading commands of module '${mod.name}'`);
-            this.loadCommandsAndEvents(mod);
+            this.loadModuleComponents(mod);
             if (mod.init) mod.init();
         });
     }
 
-    // load all commands of a mod
-    loadCommandsAndEvents(mod)  {
+    // load all components of a mod
+    loadModuleComponents(mod)  {
         const isJSFile = source => path.extname(source) === '.js';
-        const getCommandFiles = source =>
-            readdirSync(source).map(name => {
+        const isDir = source => fs.existsSync(source);
+        const getComponentFiles = source =>
+            isDir(source) ?
+            fs.readdirSync(source).map(name => {
                 if (name.startsWith('_')) return '';
                 return path.join(source, name);
-            }).filter(isJSFile);
+            }).filter(isJSFile) : [];
 
-        getCommandFiles(mod.commandsPath).map(commandFile => this.loadCommand(commandFile, mod));
-        getCommandFiles(mod.eventsPath).map(eventFile => this.loadEvent(eventFile, mod));
+        // Is the order important? I don't think so?
+        getComponentFiles(mod.eventsPath).map(eventFile => this.loadComponent(eventFile, mod));
+        getComponentFiles(mod.commandsPath).map(commandFile => this.loadComponent(commandFile, mod));
+        getComponentFiles(mod.tasksPath).map(taskFile => this.loadComponent(taskFile, mod));
+
+    }
+
+    loadComponent(componentFile, mod) {
+        let compType = this.getComponentType(componentFile);
+        this.bot.coreDebug(`Loading ${compType}: ` +
+            `${path.basename(componentFile)} from Modulefolder ${mod.id}... `);
+        let component;
+        if (compType === 'command')
+            component = this.loadCommand(componentFile, mod);
+        else if (compType === 'event')
+            component = this.loadEvent(componentFile, mod);
+        else if (compType === 'task')
+            component = this.loadTask(componentFile, mod);
+        if (component) process.stdout.write(chalk.magenta(`DONE! ${component} is loaded!`));
+        return component;
+    }
+
+    getComponentType(componentFile) {
+        return path.basename(path.dirname(componentFile)).slice(0, -1);
     }
 
     loadCommand(commandFile, mod) {
-        this.bot.coreDebug(`Loading command: ${path.basename(commandFile)} from Modulefolder ${mod.id}... `);
-        let command = new Command(commandFile, mod, this.bot);
-        if (!command) return false;
-        if (this.manageDuplicates(command) === false) {
+        try {
+            let cmd = new Command(commandFile, mod, this.bot);
+            if (!cmd) return false;
+            if (this.manageDuplicates(cmd) === false) {
+                return false;
+            }
+            this.commands.push(cmd);
+            mod.commands.push(cmd);
+            this.addPermissions(cmd);
+            return cmd;
+        } catch (err) {
+            mod.error(err);
             return false;
         }
-        this.addPermissions(command);
-        this.commands.push(command);
-        mod.commands.push(command);
-        process.stdout.write(chalk.magenta(`DONE! ${command} is loaded!`));
-        return true;
     }
 
     loadEvent(eventFile, mod) {
-        this.bot.coreDebug(`Loading event: ${path.basename(eventFile)} from Modulefolder ${mod.id}... `);
-        let event = new Command(eventFile, mod, this.bot);
-        if (!event) return false;
-        this.addPermissions(event);
-        this.events.push(event);
-        mod.events.push(event);
-        event.inject();
-        process.stdout.write(chalk.magenta(`DONE! ${event} is loaded!`));
-        return true;
+        try {
+            let event = new Event(eventFile, mod, this.bot);
+            if (!event) return false;
+            this.addPermissions(event);
+            this.events.push(event);
+            mod.events.push(event);
+            event.inject();
+            process.stdout.write(chalk.magenta(`DONE! ${event} is loaded!`));
+            return event;
+        } catch (err) {
+            mod.error(err);
+            return false;
+        }
     }
 
-    ejectAllEvents() {
-        this.bot.moduleManager.modules.forEach(function(mod) {
-            mod.events.forEach(function(event) {
-                event.eject();
-            }, this);
-        }, this);
+    loadTask(taskFile, mod) {
+        try {
+            let event = new Task(taskFile, mod, this.bot);
+            if (!event) return false;
+            this.addPermissions(event);
+            this.tasks.push(event);
+            mod.tasks.push(event);
+            // TODO: To be implemented... stuff to do with freshly loaded task
+        } catch (err) {
+            mod.error(err);
+            return false;
+        }
     }
 
-    /**
-     * Requires the module that contains the command to be loaded/indexed
-     *
-     * @param {any} commandName
-     * @memberof CommandManager
-     */
-    loadCommandByNameAndModuleFolderName(commandName, moduleFolderName) {
-        if (this.getCommandByCallable(commandName)) return false; // command already loaded
-        let mod = this.bot.moduleManager.getModuleByFolderName(moduleFolderName);
-        if (!mod) return;
-        const isJSFile = source => path.extname(source) === '.js';
-        const getCommandFiles = source =>
-            readdirSync(source).map(name => {
-                if (name.startsWith('_')) return __filename;
-                return path.join(source, name);
-            }).filter(isJSFile);
+    // Is this used at all? Or can that be deleted?
+    // /**
+    //  * Requires the module that contains the command to be loaded/indexed
+    //  *
+    //  * @param {any} commandName
+    //  * @memberof componentManager
+    //  */
+    // loadCommandByNameAndModuleFolderName(commandName, moduleFolderName) {
+    //     if (this.getCommandByCallable(commandName)) return false; // command already loaded
+    //     let mod = this.bot.moduleManager.getModuleByFolderName(moduleFolderName);
+    //     if (!mod) return;
+    //     const isJSFile = source => path.extname(source) === '.js';
+    //     const getCommandFiles = source =>
+    //         readdirSync(source).map(name => {
+    //             if (name.startsWith('_')) return __filename;
+    //             return path.join(source, name);
+    //         }).filter(isJSFile);
 
-        getCommandFiles(mod.commandsPath).map(commandFile => {
-            let tmpCmd = new Command(commandFile, mod, this.bot);
-            if (tmpCmd && tmpCmd.callables.indexOf(commandName) !== -1) {
-                this.loadCommand(commandFile, mod, this.bot);
-                return;
-            }
-        });
-        this.bot.coreDebug(`Was unable to find a command that would be triggered by \`${commandName}\` in the Module folder \`${moduleFolderName}\``);
-        return true;
-    }
+    //     getCommandFiles(mod.commandsPath).map(commandFile => {
+    //         let tmpCmd = new Command(commandFile, mod, this.bot);
+    //         if (tmpCmd && tmpCmd.callables.indexOf(commandName) !== -1) {
+    //             this.loadComponent(commandFile, mod, this.bot);
+    //             return;
+    //         }
+    //     });
+    //     this.bot.coreDebug(`Was unable to find a command that would be triggered by \`${commandName}\` in the Module folder \`${moduleFolderName}\``);
+    //     return true;
+    // }
 
     /**
      * Unloads all the commands of a module - does not unindex the module itself (for easier reloding purposes)
      *
      * @param {any} mod
-     * @memberof CommandManager
+     * @memberof ComponentManager
      */
     unloadModuleCommands(mod) {
         this.bot.debug('Current mod commands: ' + mod.commands.map(m => m.cmd));
@@ -120,7 +161,7 @@ class CommandManager {
 
     reloadCommand(command) {
         return  this.unloadCommand(command) &&
-                this.loadCommand(command.path, command.mod);
+                this.loadComponent(command.path, command.mod);
     }
 
     reloadCommandByCallable(commandName) {
@@ -145,7 +186,7 @@ class CommandManager {
      *
      * @param {Command} command
      * @returns {bool} bool if the command is addable to the current commandpool
-     * @memberof CommandManager
+     * @memberof ComponentManager
      */
     manageDuplicates(command) {
         // check if command name is already taken from another command name
@@ -181,17 +222,17 @@ class CommandManager {
         return true;
     }
 
-    addPermissions(cmd) {
-        let newPerms = cmd.permissions.filter( perm => {
+    addPermissions(component) {
+        let newPerms = component.permissions.filter( perm => {
             return this.bot.settings.permissions.indexOf(perm) === -1;
         });
         if (newPerms.length === 0) return;
         this.bot.settings.permissions = this.bot.settings.permissions.concat(newPerms);
-        this.bot.coreDebug(` Adding permissions due to ${cmd} settings: ${newPerms} `);
+        this.bot.coreDebug(` Adding permissions due to ${component} settings: ${newPerms} `);
     }
 
-    removeUnneededPermissions(command) {
-        this.bot.moduleManager.removeUnneededPermissions(command);
+    removeUnneededPermissions(component) {
+        this.bot.moduleManager.removeUnneededPermissions(component);
     }
 
     /**
@@ -199,7 +240,7 @@ class CommandManager {
      *
      * @param {any} cmdName
      * @returns
-     * @memberof CommandManager
+     * @memberof ComponentManager
      */
     getCommandByCallable(cmdName) {
         for (let i = 0; i < this.commands.length; i++) {
@@ -218,7 +259,6 @@ class CommandManager {
         const args = msg.content.slice(this.bot.settings.prefix.length).trim().split(/ +/g);
         const cmdName = args.shift();//.toLowerCase(); maybe want to do this...
         let cmd = this.getCommandByCallable(cmdName);
-        this.bot.coreDebug(cmd);
         return { cmd, msg, args };
     }
 
@@ -242,4 +282,4 @@ class CommandManager {
     }
 }
 
-module.exports = CommandManager;
+module.exports = ComponentManager;

@@ -58,7 +58,7 @@ async function displayModuleHelp(message, id, cmd) {
 }
 
 async function displayCommandHelp(message, callable, cmd) {
-    cmd = cmd.bot.commandManager.getCommandByCallable(callable);
+    cmd = cmd.bot.componentManager.getCommandByCallable(callable);
     if (!cmd) return false;
     // Generate all the text for the (possibly) multiple messages
     message.channel.send(cmd.help(true));

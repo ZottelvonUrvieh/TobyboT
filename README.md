@@ -23,11 +23,11 @@ But I started completely fresh and rewrote everything from scratch so that is wh
     - [x] Get an idea of a structure that I like
     - [x] Check for correct stucture of implemented Methods
   - [ ] Implementation
-    - [ ] MongoDB implementation
+    - [x] MongoDB implementation
       - [x] Creating Tables
       - [x] Inserting Documents
-      - [ ] deleteTable / setTableRows
-      - [ ] Move config to file so noone can use the DB access :)
+      - [x] deleteTable / setTableRows
+      - [x] Move config to file so noone can use the DB access :) (now also in config.cfg)
     - [ ] LowDB implementation as fallback
 - [x] **Logging**
   - [x] Different console log/debug/warnings/errors for:
@@ -37,22 +37,19 @@ But I started completely fresh and rewrote everything from scratch so that is wh
     - [ ] Discord Events
     - [ ] Event System for timed / repeated tasks
 - [x] **ErrorHandler**
+    - [x] Integrated into the Core Module through events
 - [ ] **Configuration manager**
   - [x] Initial config with prefix, bot-token, owners, etc
-  - [ ] Commands for:
+  - [x] Commands for:
     - [x] Prefix changeing
-    - [ ] Adding / Removing owners
+    - [x] Adding / Removing owners
     - [x] Default permissions
+    - [x] General command to update any config that is in the file
   - [ ] Persist config better than currently handled
 - [ ] **ModuleManager**
   - [x] Reloading Modules
   - [x] Flexible Permission loading / unloading
-  - [x] Methods that get executed on different occasions:
-    - [x] On Discord login
-    - [x] On Module load
-    - [x] On Module unload
-    - [ ] On Discord disconnect ~~does not fire somehow...~~
-- [ ] **CommandManager**
+- [ ] **ComponentManager**
   - [x] Parsing Message into Command / Args
   - [x] Checking for several things before Command execution:
     - [x] From bot?
@@ -63,7 +60,6 @@ But I started completely fresh and rewrote everything from scratch so that is wh
   - [x] Reloading Commands
   - [x] Flexible Permission loading / unloading
   - [x] Manage duplicate cmd's / aliases
-- [ ] *EventManager?*
 
 ### **Modules:**
 - **Core:**
@@ -75,7 +71,12 @@ But I started completely fresh and rewrote everything from scratch so that is wh
   - [x] Reloading
       - [x] Commands
       - [x] Modules
-      - [ ] Events
+      - [x] Events
+        - [x] On Discord login
+        - [x] On Module load
+        - [x] On Module unload
+        - [x] On Message received (tiwce actually - one for command handling one for automated deletion of messages)
+        - [ ] On Discord disconnect ~~does not fire somehow...~~
 - **Core Additions:**
   - [ ] Do I want to have them split up?
   - [x] Ping

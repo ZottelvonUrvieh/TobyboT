@@ -1,17 +1,25 @@
-module.exports = {
-    inject: function (bot) {
-        bot.on('message', () => {
-            bot.log('Got a message Master!');
-        });
-    },
+function run(msg) {
+    let cmdMsgArgs = this.componentManager.parseMsgToCommand(msg);
+    this.componentManager.runCommand(cmdMsgArgs);
+}
 
+
+module.exports = {
+    inject: function () {
+        self = this;
+        this.bot.on('message', run);
+    },
+    eject: function () {
+        this.bot.removeListener('message', run);
+    },
     configs: function () {
-        this.name = 'Message event';
+        this.name = 'Command parsing & executing';
         this.permissions = [];
         this.location = 'ALL';
-        this.description = 'Runs every time a message is written in any guild the Bot is on.';
+        this.description = 'This will be executed everytime the ';
         this.debugMode = true;
         this.category = 'Debug';
         this.tags = ['Core', 'Debugging'];
     }
 };
+let self = null;

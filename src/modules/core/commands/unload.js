@@ -1,7 +1,7 @@
 module.exports = {
     run: async function (message, args) {
         const m = await message.channel.send(`Trying to unload ${args[0]}`);
-        let success = this.bot.commandManager.unloadCommandByName(args[0]);
+        let success = this.bot.componentManager.unloadCommandByName(args[0]);
         if (success === true) await m.edit(`Command ${args[0]} successfull unloaded!`);
         else await m.edit(`No command that listens on ${args[0]} found...`);
     },

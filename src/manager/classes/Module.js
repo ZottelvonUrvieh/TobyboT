@@ -1,21 +1,7 @@
 // this class is the
 class Module {
     constructor(path, bot) {
-        this.debug = function (output) {
-            if (bot.settings.debugFlags.indexOf('dependant') !== -1 && this.debugMode === true)
-                bot.debug(`In ${this.toString()}: ${output}`);
-        };
-
-        this.log = function (output) {
-            bot.log(`In ${this.toString()}: ${output}`);
-        };
-
-        this.error = function (output) {
-            bot.error(`In ${this.toString()}: ${output}`);
-        };
-        this.toString = function () {
-            return `${this.name}`;
-        };
+        injectDebugAndLogging(bot, this);
 
         this.id = require('path').basename(path);
         let loadedData;
@@ -36,24 +22,13 @@ class Module {
                 this[property] = this.configs[property];
             }
         }
-        this.commands = [];
-        this.events = [];
-        this.path = path;
-        this.commandsPath = require('path').resolve(path, 'commands');
-        this.eventsPath = require('path').resolve(path, 'events');
-
-        this.help = function (detailed) {
-            if (detailed) return this.detailedHelp();
-            let retString = `__**${this.name}**__ (ID: ${this.id}):\n${this.description}`;
-            return retString;
-        };
-
-        this.detailedHelp = function () {
-            let retString = `**${this.name}** (ID: ${this.id}):\n${this.description}`;
-            if (this.tags.length > 0) retString += `\n\n**Tags:** [${this.tags.join(', ')}]`;
-            else retString += '\n\n**Tags:** None';
-            return retString;
-        };
+        this.commands       = [];
+        this.events         = [];
+        this.tasks          = [];
+        this.path           = path;
+        this.commandsPath   = require('path').resolve(path, 'commands');
+        this.eventsPath     = require('path').resolve(path, 'events');
+        this.tasksPath      = require('path').resolve(path, 'tasks');
 
         // Called when bot starts, before login into Discord, before the commands get loaded. One time only.
         this.pre_init = loadedData.pre_init;
@@ -72,7 +47,40 @@ class Module {
 
         // Called when the bot disconnects from Discord
         this.disconnect = loadedData.disconnect;
+
+        // directly run the pre_init for this mod
         if (this.pre_init) this.pre_init();
     }
 }
+let injectDebugAndLogging = function (bot, self) {
+    self.debug = function (output) {
+        if (bot.settings.debugFlags.indexOf('dependant') !== -1 && self.debugMode === true)
+            bot.debug(`In ${self.toString()}: ${output}`);
+    };
+
+    self.log = function (output) {
+        bot.log(`In ${self.toString()}: ${output}`);
+    };
+
+    self.error = function (output) {
+        bot.error(`In ${self.toString()}: ${output}`);
+    };
+    self.toString = function () {
+        return `${self.name}`;
+    };
+
+    self.help = function (detailed) {
+        if (detailed) return self.detailedHelp();
+        let retString = `__**${self.name}**__ (ID: ${self.id}):\n${self.description}`;
+        return retString;
+    };
+
+    self.detailedHelp = function () {
+        let retString = `**${self.name}** (ID: ${self.id}):\n${self.description}`;
+        if (self.tags.length > 0) retString += `\n\n**Tags:** [${self.tags.join(', ')}]`;
+        else retString += '\n\n**Tags:** None';
+        return retString;
+    };
+};
+
 module.exports = Module;
