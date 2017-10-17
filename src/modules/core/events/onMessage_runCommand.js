@@ -20,7 +20,6 @@ module.exports = {
         this.permissions = [];
         this.location = 'ALL';
         this.description = 'Executes commands when a message got received.';
-        this.forceMode = 1; // 0: Do not force to delete messages, 1: Force deleting messages, 2: Force not deleting messages
         this.debugMode = true;
         this.category = 'Debug';
         this.tags = ['Core', 'Debugging'];

@@ -1,41 +1,6 @@
 const chalk = require('chalk');
 class LoggingManager {
     constructor(bot) {
-        // simple error handling - also move that into event folders like the todo below
-        bot.on('error', (e) => bot.error(e.stack));
-        bot.on('warn', (e) => bot.warn(e));
-        bot.on('debug', (e) => bot.discordDebug(e));
-        process.on('uncaughtException', function (err) {
-            if (err.stack)
-                return bot.error(err.stack, 'UNCAUGHT: ');
-            return bot.error(err, 'UNCAUGHT: ');
-        });
-        process.on('unhandledRejection', function (reason, p) {
-            if (reason && reason.name === 'DiscordAPIError')
-                return bot.discordDebug(reason + ' do do something! (Like deleting messages, kicking people, changing servers / roles etc.. for example)');
-            else if (reason.stack)
-                return bot.error(reason.message + '   ' + reason.stack, `Promise ${p}: `);
-            return bot.error(reason, `Promise ${p}: `);
-        });
-
-        // TODO: Make these into files in core/event folder currently it should create duplicates
-        //       if you would use the reload command multiple times...
-        // Seems to never fire... maybe remove it?
-        bot.on('disconnect', () => {
-            this.bot.warn('Disconnected from Discord!');
-            this.bot.moduleManager.disconnectCalls();
-        });
-
-        bot.on('resume', () => {
-            this.bot.warn('Resumed Discord!');
-            // bot.moduleManager.disconnectCalls();
-        });
-
-        bot.on('reconnecting', () => {
-            this.bot.warn('Reconnecting Discord!');
-            // bot.moduleManager.disconnectCalls();
-        });
-
         // beautify the logging options
         bot.log = this.log;
         bot.error = this.error;
