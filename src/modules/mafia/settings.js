@@ -35,7 +35,7 @@ module.exports = {
         return {
             name: 'Mafia',
             description: 'Mafia-Games Module to handle moderation, votes, etc...',
-            tags: ['Games', 'Secret'],           // Some tags for the menu
+            categories: ['Games', 'Secret'],           // Some tags for the menu
             permissions: [],    // Permissions your module requires (eg. MESSAGE_DELETE)
             debugMode: false,   // weather or not to show the debug messages in the console
             ownersOnly: true   // If true this module is unusable to anyone besides the configured owners
