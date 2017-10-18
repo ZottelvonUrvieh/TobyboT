@@ -2,6 +2,7 @@ const ModuleComponent = require('./Module_ModuleComponent');
 class Event extends ModuleComponent {
     constructor(filePath, mod, bot) {
         super(filePath, mod, bot);
+        this.functions = this.eventFunctions;
     }
     detailedHelp() {
         let retString = `**__${this.name}:__**\n${this.description}\n`;

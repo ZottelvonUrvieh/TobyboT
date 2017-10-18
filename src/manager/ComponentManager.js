@@ -11,6 +11,7 @@ class ComponentManager {
         this.commands = [];
         this.events = [];
         this.tasks = [];
+
         // initialize all the modules and their commands
         bot.moduleManager.modules.map(mod => {
             bot.log(`Loading commands of module '${mod.name}'`);
@@ -57,53 +58,67 @@ class ComponentManager {
     }
 
     loadCommand(commandFile, mod) {
+        let cmd;
         try {
-            let cmd = new Command(commandFile, mod, this.bot);
-            if (!cmd) return false;
-            if (this.manageDuplicates(cmd) === false) {
-                return false;
-            }
-            this.commands.push(cmd);
-            mod.commands.push(cmd);
-            this.addPermissions(cmd);
-            return cmd;
+            cmd = new Command(commandFile, mod, this.bot);
         } catch (err) {
             mod.error(err);
             return false;
         }
+        if (!cmd) return false;
+        if (this.manageDuplicates(cmd) === false) {
+            return false;
+        }
+        this.commands.push(cmd);
+        mod.commands.push(cmd);
+        this.addPermissions(cmd);
+        return cmd;
     }
 
     loadEvent(eventFile, mod) {
+        let event;
         try {
-            let event = new Event(eventFile, mod, this.bot);
-            if (!event) return false;
-            this.addPermissions(event);
-            this.events.push(event);
-            mod.events.push(event);
-            event.inject();
-            process.stdout.write(chalk.magenta(`DONE! ${event} is loaded!`));
-            return event;
+            event = new Event(eventFile, mod, this.bot);
         } catch (err) {
             mod.error(err);
             return false;
         }
+        if (!event) return false;
+        this.addPermissions(event);
+        this.events.push(event);
+        mod.events.push(event);
+        // Add listeners to EventEmitters
+        if (event.functions && event.functions.length > 0)
+            event.functions.forEach(function(elem) {
+                elem.object.on(elem.event, elem.function);
+            }, this);
+        return event;
     }
 
+    // Yeah I know currently Tasks and Events are pretty much the same thing... but that might change in the future...
+    // So that is why they are split up and have different functions already.
     loadTask(taskFile, mod) {
+        let task;
         try {
-            let event = new Task(taskFile, mod, this.bot);
-            if (!event) return false;
-            this.addPermissions(event);
-            this.tasks.push(event);
-            mod.tasks.push(event);
-            // TODO: To be implemented... stuff to do with freshly loaded task
+            task = new Task(taskFile, mod, this.bot);
         } catch (err) {
             mod.error(err);
             return false;
         }
+        if (!task) return false;
+        this.addPermissions(task);
+        // Add listeners to EventEmitters
+        if (task.functions && task.functions.length > 0)
+            task.functions.forEach(function(elem) {
+                elem.object.on(elem.event, elem.function);
+            }, this);
+        this.tasks.push(task);
+        mod.tasks.push(task);
+        return task;
     }
 
-    // Is this used at all? Or can that be deleted?
+    // Is this used at all? Or can that be deleted? I was used... when I had the load command...
+    // Might want to make one again... Not a priority tho... (But I know that and how it works)
     // /**
     //  * Requires the module that contains the command to be loaded/indexed
     //  *
@@ -138,29 +153,44 @@ class ComponentManager {
      * @param {any} mod
      * @memberof ComponentManager
      */
-    unloadModuleCommands(mod) {
+    unloadModuleComponents(mod) {
         this.bot.debug('Current mod commands: ' + mod.commands.map(m => m.cmd));
         while (mod.commands.length > 0) {
-            this.bot.debug(`Removing: ${mod.commands[0]}`);
-            this.unloadCommand(mod.commands[0]);
+            this.bot.debug(`Unloading command: ${mod.commands[0]}`);
+            this.unloadComponent(mod.commands[0]);
+        }
+        while (mod.events.length > 0) {
+            this.bot.coreDebug(`Unloading event: ${mod.events[0]}`);
+            this.unloadComponent(mod.events[0]);
+        }
+        while (mod.tasks.length > 0) {
+            this.bot.coreDebug(`Unloading task: ${mod.tasks[0]}`);
+            this.unloadComponent(mod.tasks[0]);
         }
     }
 
-    unloadCommand(command) {
-        if (command === false) return false;
-        this.removeUnneededPermissions(command);
-        this.commands.splice(this.commands.indexOf(command), 1);
-        command.mod.commands.splice(command.mod.commands.indexOf(command), 1);
-        this.bot.coreDebug(`Unloaded ${command}`);
+    unloadComponent(component) {
+        if (component === false) return false;
+        this.removeUnneededPermissions(component);
+
+        // Remove listeners from EventEmitters
+        if (component.functions && component.functions.length > 0)
+            component.functions.forEach(function(elem) {
+                elem.object.removeListener(elem.event, elem.function);
+            }, this);
+
+        this[`${component.type}s`].splice(this[`${component.type}s`].indexOf(component), 1);
+        component.mod[`${component.type}s`].splice(component.mod[`${component.type}s`].indexOf(component), 1);
+        this.bot.coreDebug(`Unloaded ${component}`);
         return true;
     }
 
-    unloadCommandByName(commandName) {
-        return this.unloadCommand(this.getCommandByCallable(commandName));
+    unloadComponentByName(commandName) {
+        return this.unloadComponent(this.getCommandByCallable(commandName));
     }
 
-    reloadCommand(command) {
-        return  this.unloadCommand(command) &&
+    reloadComponent(command) {
+        return  this.unloadComponent(command) &&
                 this.loadComponent(command.path, command.mod);
     }
 
@@ -171,7 +201,7 @@ class ComponentManager {
             return false;
         }
         this.bot.coreDebug(`Reloading  ${command}.`);
-        this.reloadCommand(command);
+        this.reloadComponent(command);
         return command;
     }
 
@@ -224,10 +254,10 @@ class ComponentManager {
 
     addPermissions(component) {
         let newPerms = component.permissions.filter( perm => {
-            return this.bot.settings.permissions.indexOf(perm) === -1;
+            return this.bot.configs.permissions.indexOf(perm) === -1;
         });
         if (newPerms.length === 0) return;
-        this.bot.settings.permissions = this.bot.settings.permissions.concat(newPerms);
+        this.bot.configs.permissions = this.bot.configs.permissions.concat(newPerms);
         this.bot.coreDebug(` Adding permissions due to ${component} settings: ${newPerms} `);
     }
 
@@ -254,9 +284,9 @@ class ComponentManager {
 
     parseMsgToCommand(msg) {
         if (msg.author.bot) return false;
-        if (msg.content.startsWith(this.bot.settings.prefix) === false) return false;
+        if (msg.content.startsWith(this.bot.configs.prefix) === false) return false;
 
-        const args = msg.content.slice(this.bot.settings.prefix.length).trim().split(/ +/g);
+        const args = msg.content.slice(this.bot.configs.prefix.length).trim().split(/ +/g);
         const cmdName = args.shift();//.toLowerCase(); maybe want to do this...
         let cmd = this.getCommandByCallable(cmdName);
         return { cmd, msg, args };
@@ -266,7 +296,7 @@ class ComponentManager {
         if (!cmdMsgArgs.cmd) return false;
         // Check ownership only mode and if msg author is owner
         if ((cmdMsgArgs.cmd.ownersOnly || cmdMsgArgs.cmd.mod.ownersOnly) &&
-            this.bot.settings.owners.indexOf(cmdMsgArgs.msg.author.id) === -1)
+            this.bot.configs.owners.indexOf(cmdMsgArgs.msg.author.id) === -1)
             return false;
         // Check if this command should be executed in this channel ~ depending on cmd settings
         if (cmdMsgArgs.cmd.location.indexOf(cmdMsgArgs.msg.channel.type) === -1)

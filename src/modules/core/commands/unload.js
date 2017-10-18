@@ -21,7 +21,7 @@ module.exports = {
         this.description = 'Unloads a command by the commands name (or alias).';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function () {
-            return `To unload a command do: \`${this.bot.settings.prefix}${this.cmd} commandNameOrAlias\``;
+            return `To unload a command do: \`${this.bot.configs.prefix}${this.cmd} commandNameOrAlias\``;
         };
         // Makes the bot message how to use the command correctly if you throw an exception
         this.showUsageOnError = false;

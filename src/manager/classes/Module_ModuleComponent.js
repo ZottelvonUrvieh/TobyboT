@@ -9,12 +9,7 @@ class ModuleComponent {
         InjectDebugAndLogging.call(this, bot);
         delete require.cache[fileName];
         let loadedData;
-        try {
-            loadedData = require(fileName);
-        } catch (err) {
-            this.error(err);
-            return false;
-        }
+        loadedData = require(fileName);
         // set all the properties
         let configs = function () { };
         for (let param in loadedData) {
@@ -24,22 +19,17 @@ class ModuleComponent {
                 else this[param] = loadedData[param];
             }
         }
-        try {
-            configs.call(this);
-        } catch (err) {
-            this.error(err);
-            return false;
-        }
+        configs.call(this);
     }
 }
 
 let InjectDebugAndLogging = function (bot) {
     this.debug = function (output) {
-        if (bot.settings.debugFlags.indexOf('dependant') !== -1 && (this.debugMode === true || this.mod.debugMode === true))
+        if (bot.configs.debugFlags.indexOf('dependant') !== -1 && (this.debugMode === true || this.mod.debugMode === true))
             bot.debug(output, `${this.toLog()}: `);
     };
     this.log = function (output) {
-        bot.log(output, `${this.toString()}: `);
+        bot.log(output, `${this.toLog()}: `);
     };
     this.warn = function (output) {
         bot.warn(output, `${this.toLog()}: `);
@@ -52,6 +42,19 @@ let InjectDebugAndLogging = function (bot) {
     };
     this.toLog = function () {
         return `[${this.mod.id}] - ${require('path').basename(this.path)}`;
+    };
+    this.toDebugString = function () {
+        let moduleObjectKeysAndType = [];
+        for (let key in this) {
+            if (this.hasOwnProperty(key)) {
+                moduleObjectKeysAndType.push(
+                    `\n${key}${['string', 'bool', 'number'].indexOf(typeof this[key]) !== -1
+                        ? `: ${this[key]}`
+                        : `: Property of type '${typeof this[key]}'`}`
+                );
+            }
+        }
+        return `ModuleObject: ${moduleObjectKeysAndType}`;
     };
 };
 

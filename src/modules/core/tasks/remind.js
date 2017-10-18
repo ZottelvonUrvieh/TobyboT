@@ -1,23 +1,26 @@
 module.exports = {
-    run: async function (message, ) {
-        let m = await message.channel.send(':thinking: Ping');
-        m = await m.edit(':thinking: Ping...');
-        await m.edit(`:bulb: Pong! My responsiness is round about ${m.editedTimestamp - m.createdTimestamp}ms.`);
+    run: async function ( mod ) {
+        mod.log('hheeeayyhafjekjk');
     },
 
     configs: function () {
+        // Here you can make an array of functions you want to be repeated every x milliseconds
+        // x is a a changable config that is located in the config.cfg but it will influence ALL other modules aswell!
+        this.repeatFunctions = [
+            {object: this.bot.taskManager, event: 'repeat', function: this.run}
+        ];
         // Displayname that gets shown in help etc.
-        this.name = 'Ping';
-        // Command that will be used to trigger the bot to execute the run function
-        this.cmd = 'ping';
-        // All these will trigger the run function aswell
-        this.alias = ['pong'];
+        this.name = 'Reminder-Handler';
+        // Give it a good and unique id - used for e.g. loading/unloading/reloading it at runtime
+        // Essencially works the same like the cmd in commands. The bot will inform you if you
+        // picked a non unique one on startup.
+        this.id = 'ping';
         // If more needed than in the module already configured e.g. MANAGE_MESSAGES
         this.permissions = [];
         // 'dm', 'group', 'text', 'voice' - where the command can be triggered. 'text' is in guild channels
         this.location = ['dm', 'group', 'text'];
         // Description for the help / menue
-        this.description = 'Gets feedback about the ping of the bot.';
+        this.description = 'Trackes and handles sending out set reminders.';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function() {
             return `Just do: \`${this.bot.configs.prefix}${this.cmd}\``;

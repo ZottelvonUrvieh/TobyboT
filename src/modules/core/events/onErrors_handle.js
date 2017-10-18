@@ -1,6 +1,6 @@
 function rejectOrErrFilterDiscord (reason, p) {
     if (reason && reason.name === 'DiscordAPIError')
-        return this.discordDebug(reason + ' do do something! (Like deleting already deleted messages, ' +
+        return self.bot.discordDebug(reason + ' do do something! (Like deleting already deleted messages, ' +
             'to little permissions but trying to kicking people, delete messages out of dms, changing servers' +
             ' / roles etc.. just to name a couple examples)'
         );
@@ -10,23 +10,14 @@ function rejectOrErrFilterDiscord (reason, p) {
 }
 
 module.exports = {
-    inject: function () {
-        self = this;
-        this.bot.on('error', this.error);
-        this.bot.on('warn', this.warn);
-        this.bot.on('debug', this.bot.discordDebug);
-
-        process.on('uncaughtException', rejectOrErrFilterDiscord);
-        process.on('unhandledRejection', rejectOrErrFilterDiscord);
-    },
-    eject: function () {
-        this.bot.removeListener('error', this.error);
-        this.bot.removeListener('warn', this.warn);
-        this.bot.removeListener('debug', this.bot.discordDebug);
-        process.removeListener('uncaughtException', rejectOrErrFilterDiscord);
-        process.removeListener('unhandledRejection', rejectOrErrFilterDiscord);
-    },
     configs: function () {
+        this.eventFunctions = [
+            { object: this.bot,     event: 'error',                 function: this.error                },
+            { object: this.bot,     event: 'warn',                  function: this.warn                 },
+            { object: this.bot,     event: 'debug',                 function: this.bot.discordDebug     },
+            { object: process,      event: 'uncaughtException',     function: rejectOrErrFilterDiscord  },
+            { object: process,      event: 'unhandledRejection',    function: rejectOrErrFilterDiscord  }
+        ];
         this.name = 'Core Error Handler';
         this.permissions = [];
         this.location = 'ALL';
@@ -34,6 +25,7 @@ module.exports = {
         this.debugMode = true;
         this.category = 'Debug';
         this.tags = ['Core', 'Debugging'];
+        self = this;
     }
 };
 let self = null;

@@ -3,6 +3,7 @@ class Task extends ModuleComponent {
 
     constructor(filePath, mod, bot) {
         super(filePath, mod, bot);
+        this.functions = this.repeatFunctions;
     }
 
     detailedHelp() {

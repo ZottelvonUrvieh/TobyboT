@@ -3,7 +3,7 @@ const fs = require('fs');
 class ConfigManager {
     constructor(bot) {
         this.bot = bot;
-        this.bot.settings = {};
+        this.bot.configs = {};
         this.parse_config_file();
         this.checkSettings();
     }
@@ -16,21 +16,21 @@ class ConfigManager {
             if (line.length !== 2) return;
             // Make properties that are ment to be arrays acutal arrays instead of one string
             if (line[1].includes('[')) line[1] = line[1].replace('[', '').replace(']', '').split(',').map(s => s.trim());
-            this.bot.settings[line[0].trim()] = line[1];
+            this.bot.configs[line[0].trim()] = line[1];
         }, this);
-        if (this.bot.settings.defaultPermissions) this.bot.settings.permissions = this.bot.settings.defaultPermissions;
-        else this.bot.settings.permissions = [];
+        if (this.bot.configs.defaultPermissions) this.bot.configs.permissions = this.bot.configs.defaultPermissions;
+        else this.bot.configs.permissions = [];
     }
 
     // TODO: expand!
     checkSettings() {
         let output = [];
-        if (this.bot.settings.prefix === '' || typeof this.bot.settings.prefix === 'undefined') {
+        if (this.bot.configs.prefix === '' || typeof this.bot.configs.prefix === 'undefined') {
             output.push('You have chosen an empty prefix... that is not allowed. (Or your config is broken) Go check the config.cfg!');
         }
         output.forEach(function (e) { throw this.bot.error(e); }.bind(this));
-        this.bot.log(`Bot Prefix is set to: '${this.bot.settings.prefix}'`);
-        this.bot.coreDebug(`Bot debug flags are set to: [${this.bot.settings.debugFlags.join(', ')}]`);
+        this.bot.log(`Bot Prefix is set to: '${this.bot.configs.prefix}'`);
+        this.bot.coreDebug(`Bot debug flags are set to: [${this.bot.configs.debugFlags.join(', ')}]`);
     }
 
     // kinda dirty... but well... it is not like the config.cfg will ever be

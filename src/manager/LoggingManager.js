@@ -47,7 +47,7 @@ class LoggingManager {
     }
 
     discordDebug(output, label = '') {
-        if (['true', 'discord'].some(e => this.settings.debugFlags.indexOf(e) !== -1)) {
+        if (['true', 'discord'].some(e => this.configs.debugFlags.indexOf(e) !== -1)) {
             return process.stdout.write(chalk.cyan(this.loggify('[D]', label + output)));
         }
     }
@@ -57,7 +57,7 @@ class LoggingManager {
     }
 
     coreDebug(output, label = '') {
-        if (this.settings.debugFlags.indexOf('core') !== -1) {
+        if (this.configs.debugFlags.indexOf('core') !== -1) {
             return process.stdout.write(chalk.magenta(this.loggify('[C]', label + output)));
         }
     }

@@ -51,9 +51,9 @@ module.exports = {
         this.description = 'Make your own awesome personal tags that only you can use on any server the bot is on!';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function () {
-            return  `Create / edit tags: \`\`\`${this.bot.settings.prefix}${this.cmd} edit nameOfTheTag This is some cool text.\`\`\`` +
-                    `To delete tags leave the text empty: \`\`\`${this.bot.settings.prefix}${this.cmd} edit nameOfTheTag\`\`\`` +
-                    `Show a tag with: \`\`\`${this.bot.settings.prefix}${this.cmd} nameOfTheTag\`\`\``;
+            return  `Create / edit tags: \`\`\`${this.bot.configs.prefix}${this.cmd} edit nameOfTheTag This is some cool text.\`\`\`` +
+                    `To delete tags leave the text empty: \`\`\`${this.bot.configs.prefix}${this.cmd} edit nameOfTheTag\`\`\`` +
+                    `Show a tag with: \`\`\`${this.bot.configs.prefix}${this.cmd} nameOfTheTag\`\`\``;
         };
         // Makes the bot message how to use the command correctly if you throw an exception
         this.showUsageOnError = false;

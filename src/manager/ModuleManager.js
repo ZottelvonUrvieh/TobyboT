@@ -32,16 +32,15 @@ class ModuleManager {
         this.addPermissions(mod);
         this.modules.push(mod);
         if (mod.module_load) mod.module_load();
-        process.stdout.write(require('chalk').magenta(`DONE! Module '${mod}' is indexed!`));
         return mod;
     }
 
     addPermissions(mod) {
         let newPerms = mod.permissions.filter( perm => {
-            return this.bot.settings.permissions.indexOf(perm) === -1;
+            return this.bot.configs.permissions.indexOf(perm) === -1;
         });
         if (newPerms.length === 0) return;
-        this.bot.settings.permissions = this.bot.settings.permissions.concat(newPerms);
+        this.bot.configs.permissions = this.bot.configs.permissions.concat(newPerms);
         this.bot.coreDebug(` Adding permissions due to Module ${mod.name} settings: ${newPerms} `);
     }
 
@@ -54,7 +53,7 @@ class ModuleManager {
      */
     removeUnneededPermissions(mod) {
         // Heck... can someone plz make this shorter? I am too lazy rn and it works... :D
-        let neededPerms = this.bot.settings.defaultPermissions;
+        let neededPerms = this.bot.configs.defaultPermissions;
         this.modules.forEach(function(module) {
             if (mod === module) return;
             module.permissions.forEach( perm => {
@@ -68,20 +67,21 @@ class ModuleManager {
             },this);
         }, this);
 
-        let removedPerms = this.bot.settings.permissions.filter(perm =>{
+        let removedPerms = this.bot.configs.permissions.filter(perm =>{
             return neededPerms.indexOf(perm) === -1;
         });
         if (removedPerms.length === 0) return;
         this.bot.coreDebug(`Removing unneeded permissions because of unloading ${mod}: [${removedPerms}]`);
-        this.bot.settings.permissions = neededPerms;
+        this.bot.configs.permissions = neededPerms;
     }
 
     unloadModuleByID(modID) {
         for (let index = 0; index < this.modules.length; index++) {
             let mod = this.modules[index];
             if (mod.id === modID) {
-                this.bot.componentManager.unloadModuleCommands(mod);
                 mod.module_unload();
+                this.bot.componentManager.unloadModuleComponents(mod);
+                mod.post_module_unload();
                 this.modules.splice(index, 1);
                 return true;
             }
@@ -92,7 +92,7 @@ class ModuleManager {
     reloadModule(mod) {
         this.unloadModuleByID(mod.id);
         let newMod = this.indexModule(mod.path);
-        this.bot.componentManager.loadCommandsAndEvents(newMod);
+        this.bot.componentManager.loadModuleComponents(newMod);
         return newMod;
     }
 
@@ -102,7 +102,7 @@ class ModuleManager {
         this.bot.coreDebug(`Reloading module with path ${path}`);
         if (this.isDirectory(path)) {
             let mod = this.indexModule(path);
-            this.bot.componentManager.loadCommandsAndEvents(mod);
+            this.bot.componentManager.loadModuleComponents(mod);
             return mod;
         }
         this.bot.error(`Was not able to reload Mod with ID ${modID}... Have you deleted or renamed the folder?`);
@@ -110,8 +110,10 @@ class ModuleManager {
     }
 
     reloadAllModules() {
-        this.bot.componentManager.events.forEach(function(e) {
-            e.eject();
+        this.modules.forEach(function(mod) {
+            mod.module_unload();
+            this.unloadModuleByID(mod.id);
+            mod.post_module_unload();
         }, this);
         this.bot.moduleManager = new ModuleManager(this.bot);
         this.bot.componentManager = new ComponentManager(this.bot);

@@ -4,24 +4,24 @@ module.exports = {
         let sendText = '';
         if (message.mentions.users.array().length > 0) args[1] = message.mentions.users.array()[0].id;
         if (args[0] === 'add') {
-            this.bot.settings.owners.push(args[1]);
+            this.bot.configs.owners.push(args[1]);
             sendText = 'Successfully added that userID to the owners.';
         }
         else if (args[0] === 'remove') {
-            let index = this.bot.settings.owners.indexOf(args[1]);
+            let index = this.bot.configs.owners.indexOf(args[1]);
             if (index !== -1) {
                 if (args[1] === message.author.id)
                     sendText = 'You can not remove yourself from the owners. Sorry...';
                 else {
-                    this.bot.settings.owners.splice(index, 1);
+                    this.bot.configs.owners.splice(index, 1);
                     sendText = 'Successfully removed that userID from the owners.';
                 }
             }
             else sendText = 'There was no owner with that userID found...';
         }
         if (sendText === '')
-            sendText = `**The following userID's are listed as owners:**\`\`\`${this.bot.settings.owners.join(', ')}\`\`\``;
-        else this.bot.configManager.updateConfig('owners', this.bot.settings.owners);
+            sendText = `**The following userID's are listed as owners:**\`\`\`${this.bot.configs.owners.join(', ')}\`\`\``;
+        else this.bot.configManager.updateConfig('owners', this.bot.configs.owners);
 
         message.channel.send(sendText);
     },
@@ -41,9 +41,9 @@ module.exports = {
         this.description = 'Modify owners of the Bot';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function () {
-            return  `To add an owner: \`\`\`${this.bot.settings.prefix}${this.cmd} add userID\`\`\`` +
-                    `To remove an owner: \`\`\`${this.bot.settings.prefix}${this.cmd} remove userID\`\`\`` +
-                    `To show all owners: \`\`\`${this.bot.settings.prefix}${this.cmd}\`\`\``;
+            return  `To add an owner: \`\`\`${this.bot.configs.prefix}${this.cmd} add userID\`\`\`` +
+                    `To remove an owner: \`\`\`${this.bot.configs.prefix}${this.cmd} remove userID\`\`\`` +
+                    `To show all owners: \`\`\`${this.bot.configs.prefix}${this.cmd}\`\`\``;
         };
         // Makes the bot message how to use the command correctly if you throw an exception
         this.showUsageOnError = true;

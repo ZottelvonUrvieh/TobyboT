@@ -41,8 +41,8 @@ module.exports = {
         this.description = 'Reloads a command or module by the commands name (or alias).';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function () {
-            return `To reload a command: \`${this.bot.settings.prefix}${this.cmd} command\`` +
-                `\nTo reload a module: \`${this.bot.settings.prefix}${this.cmd} mod moduleID\``;
+            return `To reload a command: \`${this.bot.configs.prefix}${this.cmd} command\`` +
+                `\nTo reload a module: \`${this.bot.configs.prefix}${this.cmd} mod moduleID\``;
         };
         // Makes the bot message how to use the command correctly if you throw an exception
         this.showUsageOnError = false;

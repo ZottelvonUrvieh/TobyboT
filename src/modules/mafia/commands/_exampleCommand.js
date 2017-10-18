@@ -52,8 +52,8 @@ module.exports = {
         this.description = 'Can be awesome with awesomeness!';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function () {
-            return  `To do something do this: \`${this.bot.settings.prefix}${this.cmd}\`\n` +
-                    `To do something cooler do this: \`${this.bot.settings.prefix}${this.cmd} someArgument orTwo\``;
+            return  `To do something do this: \`${this.bot.configs.prefix}${this.cmd}\`\n` +
+                    `To do something cooler do this: \`${this.bot.configs.prefix}${this.cmd} someArgument orTwo\``;
         };
         // Makes the bot message how to use the command correctly if you throw an exception
         this.showUsageOnError = false;

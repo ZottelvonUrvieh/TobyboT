@@ -19,7 +19,7 @@ class MongoDBHandler extends DBInterface{
         this.db.on('error', err => this.error(err));
         // Use a local hosted DB
         if (this.local === true)
-            this.bot.settings.mongoDBurl = this.bot.settings.mongoDBurl_local;
+            this.bot.configs.mongoDBurl = this.bot.configs.mongoDBurl_local;
 
         this.connectDB();
     }
@@ -33,7 +33,7 @@ class MongoDBHandler extends DBInterface{
         if (this.db._readyState === 1 || this.db._readyState === 2)
             return;
         this.log('Connecting to MongoDB...');
-        mongoose.connect(this.bot.settings.mongoDBurl, { useMongoClient: true }).catch((e) => {this.warn(e); }); // we handle errors with the function: this.db.on
+        mongoose.connect(this.bot.configs.mongoDBurl, { useMongoClient: true }).catch((e) => {this.warn(e); }); // we handle errors with the function: this.db.on
         this.db.once('open', function () {
             this.log('Successfully connected to MongoDB.');
         }.bind(this));

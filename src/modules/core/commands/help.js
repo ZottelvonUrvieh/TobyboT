@@ -33,7 +33,7 @@ function generateMessages(headString, footerString, items, detailed) {
 
 async function displayGeneralHelp(message, cmd) {
     let headString = '**Currently loaded Bot-Modules**\n';
-    let footerString = `ㅤ\nTo get more information about the individual modules use \`${cmd.bot.settings.prefix}${cmd.cmd} moduleID\`ㅤ`;
+    let footerString = `ㅤ\nTo get more information about the individual modules use \`${cmd.bot.configs.prefix}${cmd.cmd} moduleID\`ㅤ`;
 
     // Generate all the text for the (possibly) multiple messages
     let msgsStrings = generateMessages(headString, footerString, cmd.bot.moduleManager.modules, false);
@@ -47,7 +47,7 @@ async function displayModuleHelp(message, id, cmd) {
     let mod = cmd.bot.moduleManager.getModuleByID(id);
     if (!mod) return false;
     let headString =  `${mod.help()} \n\n**This mod includes the commands:**\n`;
-    let footerString = `ㅤ\nTo get more information about the individual Commands use \`${cmd.bot.settings.prefix}${cmd.cmd} commandOrAlias\`ㅤ`;
+    let footerString = `ㅤ\nTo get more information about the individual Commands use \`${cmd.bot.configs.prefix}${cmd.cmd} commandOrAlias\`ㅤ`;
 
     // Generate all the text for the (possibly) multiple messages
     let msgsStrings = generateMessages(headString, footerString, mod.commands, false);
@@ -104,9 +104,9 @@ module.exports = {
         this.description = 'Can give an overview what commands are available and what they do.';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function() {
-            return  `General help: \`${this.bot.settings.prefix}${this.cmd}\`\n` +
-                    `Module specific help: \`${this.bot.settings.prefix}${this.cmd} moduleID\`` +
-                    `Command specific help: \`${this.bot.settings.prefix}${this.cmd} commandName\``;
+            return  `General help: \`${this.bot.configs.prefix}${this.cmd}\`\n` +
+                    `Module specific help: \`${this.bot.configs.prefix}${this.cmd} moduleID\`` +
+                    `Command specific help: \`${this.bot.configs.prefix}${this.cmd} commandName\``;
         };
         // Makes the bot message how to use the command correctly if you throw an exception
         this.showUsageOnError = false;

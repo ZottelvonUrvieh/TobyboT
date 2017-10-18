@@ -1,9 +1,9 @@
 function connect() {
     this.log('Successfully logged into Discord!');
-    this.user.setGame(`Use ${this.settings.prefix}help for Information`);
+    this.user.setGame(`Use ${this.configs.prefix}help for Information`);
     // bot.user.setAvatar('./tobybot2.png').catch(error => bot.error(error));
-    this.generateInvite(this.settings.permissions).then(link => {
-        this.log(`Generated bot invite link (permissions: [${this.settings.permissions}]):`);
+    this.generateInvite(this.configs.permissions).then(link => {
+        this.log(`Generated bot invite link (permissions: [${this.configs.permissions}]):`);
         this.log(`${require('chalk').underline(link)}`);
     });
     this.dbManager.connectDB();
@@ -11,23 +11,15 @@ function connect() {
 }
 
 module.exports = {
-    inject: function () {
-        self = this;
-        this.bot.on('ready', connect);
-        // This doesn't seem to fire... maye it's because of the auto reconnect option?
-        this.bot.on('disconnect', this.bot.moduleManager.disconnectCalls);
-        // Not yet used... maybe one of these is the one that should be used insead of 'disconnect'?
-        // this.bot.on('resume', this.error);
-        // this.bot.on('reconnecting', this.error);
-    },
-    eject: function () {
-        this.bot.removeListener('ready', connect);
-        this.bot.removeListener('disconnect', this.bot.moduleManager.disconnectCalls);
-        // Not yet used... (see above)
-        // this.bot.removeListener('resume', this.debug);
-        // this.bot.removeListener('reconnecting', this.debug);
-    },
     configs: function () {
+        this.eventFunctions = [
+            {object: this.bot, event: 'ready', function: connect},
+            // This doesn't seem to fire... maye it's because of the auto reconnect option?
+            {object: this.bot, event: 'disconnect', function: this.bot.moduleManager.disconnectCalls},
+            // Not yet used... maybe one of these is the one that should be used insead of 'disconnect'?
+            {object: this.bot, event: 'disconnect', function: this.bot.moduleManager.disconnectCalls},
+            {object: this.bot, event: 'disconnect', function: this.bot.moduleManager.disconnectCalls},
+        ];
         this.name = 'Discord connection handler';
         this.permissions = [];
         this.location = 'ALL';
@@ -35,6 +27,7 @@ module.exports = {
         this.debugMode = true;
         this.category = 'Debug';
         this.tags = ['Core', 'Debugging'];
+        self = this;
     }
 };
 let self = null;

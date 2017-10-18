@@ -1,4 +1,4 @@
-# **ToBeBoT**
+# **TobyboT**
 ## **Some quick disclaimers:**
 > This is a Discord bot that I purely created for my own entertainment - for learning and fun.
 

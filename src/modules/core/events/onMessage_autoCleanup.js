@@ -11,14 +11,10 @@ function run(msg) {
 
 
 module.exports = {
-    inject: function () {
-        self = this;
-        this.bot.on('message', run);
-    },
-    eject: function () {
-        this.bot.removeListener('message', run);
-    },
     configs: function () {
+        this.eventFunctions = [
+            {object: this.bot, event: 'message', function: run}
+        ];
         this.name = 'Auto Command & Botmessage cleanup';
         this.permissions = [];
         this.location = 'ALL';
@@ -29,6 +25,7 @@ module.exports = {
         this.debugMode = true;
         this.category = 'Debug';
         this.tags = ['Core', 'Debugging'];
+        self = this;
     }
 };
 let self = null;

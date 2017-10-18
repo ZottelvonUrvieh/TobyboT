@@ -1,7 +1,7 @@
 // this class is the
 class Module {
     constructor(path, bot) {
-        injectDebugAndLogging(bot, this);
+        injectDebugAndLogging.call(this, bot);
 
         this.id = require('path').basename(path);
         let loadedData;
@@ -12,8 +12,9 @@ class Module {
         } catch(e) {
             bot.error(`Not able to read the required file 'settings.js' for the Module located in the folder ${path}` +
                       '\nCheck that you have this file in the Module folder and that is does not contains mistakes.' +
-                      '\nLook at the example settings.js in the Modulefolders \'_exampleModule\' or \'builtin\' as reference.' +
-                      '\n-> Skipping the module!');
+                      '\nLook at the example settings.js in the Modulefolders \'_exampleModule\' or \'core\' as reference.' +
+                '\n-> Skipping the module!');
+            return false;
         }
         this.bot = bot;
         this.configs = loadedData.config();
@@ -31,55 +32,79 @@ class Module {
         this.tasksPath      = require('path').resolve(path, 'tasks');
 
         // Called when bot starts, before login into Discord, before the commands get loaded. One time only.
-        this.pre_init = loadedData.pre_init;
+        this.pre_init = loadedData.pre_init || function () { };
 
         // Called when bot starts, before login into Discord, after the commands got loaded. One time only.
-        this.init = loadedData.init;
+        this.init = loadedData.init || function () { };
 
         // Called when bot logs into Discord. Keep in mind, this may be called multiple times.
-        this.connect = loadedData.connect;
+        this.connect = loadedData.connect || function () { };
 
         // Called when module gets loaded. Keep in mind, this may be called multiple times. (E.g. manually reloading module)
-        this.module_load = loadedData.module_load;
+        this.module_load = loadedData.module_load || function () { };
 
-        // Called when module gets unloaded. Keep in mind, this may be called multiple times.
-        this.module_unload = loadedData.module_unload;
+        // Called when module gets unloaded, before the commands are unloaded.
+        // Keep in mind, this may be called multiple times.
+        this.module_unload = loadedData.module_unload || function () { };
+
+        // Called when module gets unloaded after the commands got unloaded.
+        // Keep in mind, this may be called multiple times.
+        this.post_module_unload = loadedData.post_module_unload || function () { };
 
         // Called when the bot disconnects from Discord
-        this.disconnect = loadedData.disconnect;
+        this.disconnect = loadedData.disconnect || function () { };
 
         // directly run the pre_init for this mod
         if (this.pre_init) this.pre_init();
     }
 }
-let injectDebugAndLogging = function (bot, self) {
-    self.debug = function (output) {
-        if (bot.settings.debugFlags.indexOf('dependant') !== -1 && self.debugMode === true)
-            bot.debug(`In ${self.toString()}: ${output}`);
+let injectDebugAndLogging = function (bot) {
+    this.debug = function (output) {
+        if (bot.configs.debugFlags.indexOf('dependant') !== -1 && this.debugMode === true)
+            bot.debug(output, this.toLog());
     };
 
-    self.log = function (output) {
-        bot.log(`In ${self.toString()}: ${output}`);
+    this.log = function (output) {
+        bot.log(output, this.toLog());
     };
 
-    self.error = function (output) {
-        bot.error(`In ${self.toString()}: ${output}`);
-    };
-    self.toString = function () {
-        return `${self.name}`;
+    this.error = function (output) {
+        bot.error(output, this.toLog());
     };
 
-    self.help = function (detailed) {
-        if (detailed) return self.detailedHelp();
-        let retString = `__**${self.name}**__ (ID: ${self.id}):\n${self.description}`;
+    this.toLog = function () {
+        return `Module ${this.id}: `;
+    };
+
+    this.toString = function () {
+        return `${this.name}`;
+    };
+
+    this.help = function (detailed) {
+        if (detailed) return this.detailedHelp();
+        let retString = `__**${this.toString()}**__ (ID: ${this.id}):\n${this.description}`;
         return retString;
     };
 
-    self.detailedHelp = function () {
-        let retString = `**${self.name}** (ID: ${self.id}):\n${self.description}`;
-        if (self.tags.length > 0) retString += `\n\n**Tags:** [${self.tags.join(', ')}]`;
+    this.detailedHelp = function () {
+        let retString = `**${this.toString()}** (ID: ${this.id}):\n${this.description}`;
+        if (this.tags.length > 0) retString += `\n\n**Tags:** [${this.tags.join(', ')}]`;
         else retString += '\n\n**Tags:** None';
         return retString;
+    };
+
+    this.toDebugString = function () {
+        let moduleObjectKeysAndType = [];
+        for (let key in this) {
+            if (this.hasOwnProperty(key)) {
+                moduleObjectKeysAndType.push(
+                    `\n${key}${['string', 'bool', 'number'].indexOf(typeof this[key]) !== -1
+                        ? `: ${this[key]}`
+                        : `: Property of type '${typeof this[key]}'`}`
+                );
+            }
+        }
+        return `ModuleObject: ${moduleObjectKeysAndType}`;
     };
 };
 

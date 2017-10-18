@@ -1,9 +1,9 @@
 module.exports = {
     run: async function (message, args) {
         let success = false;
-        if (args[0] && args[0].length > 0 && args[0] !== this.bot.settings.prefix) {
+        if (args[0] && args[0].length > 0 && args[0] !== this.bot.configs.prefix) {
             this.bot.configManager.updateConfig('prefix', args[0]);
-            this.bot.settings.prefix = args[0];
+            this.bot.configs.prefix = args[0];
             success = true;
         }
         if (success === true) message.channel.send(`Prefix successfully set to \`${args[0]}\`!`);
@@ -24,7 +24,7 @@ module.exports = {
         // Description for the help / menue
         this.description = 'Allows you to change the prefix the bot reacts to.';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
-        this.usage = function () { return `To change the prefix of the bot do: \`${this.bot.settings.prefix}${this.cmd} newPrefix\``; };
+        this.usage = function () { return `To change the prefix of the bot do: \`${this.bot.configs.prefix}${this.cmd} newPrefix\``; };
         // Makes the bot message how to use the command correctly if you throw an exception
         this.showUsageOnError = false;
         // Decides where it will be listen in the help menue
