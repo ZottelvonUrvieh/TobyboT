@@ -7,8 +7,6 @@ module.exports = {
     pre_init: function () {
         // similar as to the commands you can access the mod with 'this' and go from there
         this.debug('In pre_init!');
-        // let's just show you the whole moduleObject in the console then you know what is available :)
-        this.debug(this.toDebugString());
     },
 
     // Called when module gets loaded, before the commands get loaded. On bot start this will be right after
@@ -57,7 +55,7 @@ module.exports = {
             description: 'Some minigames - for example for Survivior!',
             tags: ['Games', 'Fun'],           // Some tags for the menu (not implemented yet)
             permissions: ['MANAGE_MESSAGES'],    // Permissions your module requires (eg. MANAGE_MESSAGES)
-            debugMode: true,   // whether or not to show the debug messages in the console
+            debugMode: false,   // whether or not to show the debug messages in the console
             ownersOnly: false   // If true this module is unusable to anyone besides the configured owners
         };
     }

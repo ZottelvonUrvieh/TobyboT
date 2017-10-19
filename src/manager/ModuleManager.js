@@ -2,6 +2,7 @@ const { lstatSync, readdirSync } = require('fs');
 const { join } = require('path');
 const Module = require('./classes/Module.js');
 const ComponentManager = require('./ComponentManager');
+const ExtensionManager = require('./ExtensionManager');
 
 class ModuleManager {
     constructor(bot) {
@@ -115,6 +116,7 @@ class ModuleManager {
             this.unloadModuleByID(mod.id);
             mod.post_module_unload();
         }, this);
+        this.bot.extensionManager = new ExtensionManager(this.bot);
         this.bot.moduleManager = new ModuleManager(this.bot);
         this.bot.componentManager = new ComponentManager(this.bot);
         return 'Everything ';

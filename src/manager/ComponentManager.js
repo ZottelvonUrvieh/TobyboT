@@ -306,7 +306,7 @@ class ComponentManager {
             if (error instanceof Error) {
                 if (cmdMsgArgs.cmd.showUsageOnError)
                     cmdMsgArgs.msg.channel.send(`**Something went wrong:**\n\`${error.message}\`\n\n${cmdMsgArgs.cmd.usage()}`);
-                cmdMsgArgs.cmd.error(error);
+                cmdMsgArgs.cmd.debug(error);
             }
         }
     }
