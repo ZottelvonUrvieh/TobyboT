@@ -1,7 +1,8 @@
 function run(msg) {
-    let cmdMsgArgs = this.componentManager.parseMsgToCommand(msg);
     if (msg.author.id === this.user.id && self.forceMode !== 2 && self.botMsgTime > 0)
         return msg.delete(self.botMsgTime);
+    if (msg.author.bot) return;
+    let cmdMsgArgs = this.componentManager.parseMsgToCommand(msg);
     if (!cmdMsgArgs) return;
     if (self.forceMode === 1)
         return msg.delete(self.userCmdTime);
