@@ -32,103 +32,138 @@ module.exports = {
      * @param {any} options This should have the structure:
      * [{text: 'Option one is this', function: functionToCallOnOptionOne, args: [funcArg1, funcArg2, ...]},
      *  {text: 'Option two is this', function: functionToCallOnOptionTwo, args: [funcArg1, funcArg2, ...]}, ...]
-     * @param {any} [context=this]
+     * @param {any} [component=this]
      * @param {boolean} [onlyCmdAuthor=true]
      */
     menu: class {
-        constructor(context) {
-            this.context = context;
+        constructor(component, pageSize = 5) {
+            this.lastEmojis = [];
+            this.component = component;
+            this.pageSize = pageSize;
             this.allowedIds;
             this.history = [];
-            this.currentPrevious = [];
-            this.currentNext = [];
-            this.current = new context.bot.extensions.core.menuPage();
+            this.current = new component.bot.extensions.core.menuCategory(component.bot );
             this.collector = null;
-            this.onEndDefault = {};
+            this.onEndDefault;
             return this;
         }
-        newPage() {
+        newCategory() {
+            this.lastEmojis = this.current.reactWith;
             this.history.push(this.current);
-            this.current = new this.context.bot.extensions.core.menuPage();
+            this.current = new this.component.bot.extensions.core.menuCategory(this.component.bot);
             return this;
         }
-        previousPage(updateLastMenu = true, upadateEmojis = true) {
-            if (this.history.length === 0) return this;
+        previousCategory() {
+            this.lastEmojis = this.current.reactWith;
+            if (this.history.length === 0) return this; // TODO: Here could be cleanup / reactioncontain.end
             this.current = this.history.pop();
-            if (updateLastMenu) this.update(upadateEmojis);
             return this;
         }
-        firstPage(updateLastMenu = true) {
-            if (this.history.length === 0) return this;
-            this.current = this.history[0];
-            this.history = [];
-            if (updateLastMenu) this.updateLast(updateLastMenu);
+        previousPage() {
+            this.lastEmojis = this.current.reactWith;
+            if (this.current.index > 0) this.current.index--; return this;
+        }
+        nextPage() {
+            this.lastEmojis = this.current.reactWith;
+            if (this.current.options.length > this.current.pageSize * (this.current.index + 1))
+                this.current.index++;
             return this;
         }
-        update(upateEmojis = false) {
+
+        update() {
             this.collector.message.edit(this.current.emb);
-            if (upateEmojis) return this.upateEmojis(); else return this;
-        }
-        async send(channel) {
-            // Send the embed to the channel
-            let m = await channel.send(this.current.emb);
-            // Collector to create events for when someone reacts with an emoji
-            //  Discord.ReactionCollector(m, (_, user) => (user.id !== this.context.bot.user.id) && (typeof this.current.allowedIds === 'undefined' || this.current.allowedIds.indexOf(user.id) !== -1), {time:180000});
-            this.collector = new Discord.ReactionCollector(m,
-                // Only take the reactions into account that are in allowedIds - or all if allowedIds is not set
-                (_, user) => (user.id !== this.context.bot.user.id) && (typeof this.current.allowedIds === 'undefined' || this.current.allowedIds.indexOf(user.id) !== -1),
-                // The timeout for the Collector
-                { time: 180000 }
-            );
-            // TODO: Why do I have to set this here again? I have set it in the configs... but it somehow somewhere reset?
-            this.context.bot.setMaxListeners(this.context.bot.configs.maxListeners);
-            // Every time someone allowed reacts with an emoji
-            this.collector.on('collect', function (reaction) {
-                // Get the correct option (out of the ones that were added) to the emoji that was reacted with
-                // Either it was defined directly in the arguments -> then we can use .find
-                // Or we have to find it in the letterEmoji object and get the index of the option that way
-                let option = this.current.options.find(o => o.emoji === reaction.emoji.name)
-                    || this.current.options[this.context.bot.extensions.core.letterEmojis[reaction.emoji.name]];
-                if (!option) return;
-                try {
-                    // If we do have an option for the reaced emoji -> Call the function with its arguments
-                    option.func.apply(this.context, option.args);
-                } catch (e) { this.context.error(e, 'Something went wrong in the callback function of the menu!'); }
-                // And remove all the reactions from the message but the ones from the bot -- can be skipped if not wanted
-                // This looks way nicer than just clear everything and then add the ones required
-                // reaction.users.array().forEach(function (user) {
-                //     if (user.id !== this.context.bot.user.id)
-                //         reaction.remove(user);
-                // }, this);
-                // We bind 'this' so we have access to the context (cmd/module/event/task) very important for the callback!
-            }.bind(this));
-            this.collector.on('end', function () {
-                this.message.clearReactions();
-            });
-            // collector.on('cleanup');
-            await this.upateEmojis();
+            this.upateEmojis();
             return this;
         }
-        async upateEmojis(resetEmojis = true) {
-            let m = this.collector.message;
-            if (resetEmojis) await m.clearReactions();
-            // For each option let the bot react with the correct emoji
-            for (let i = 0; i < this.current.reactWith.length; i++) {
-                await m.react(this.current.reactWith[i]);
-            }
-            return this;
-        }
-        setTitle(title) { this.current.emb.setTitle(title); return this; }
-        setDescription(description) { this.current.emb.setDescription(description); return this; }
-        setColor(color) { this.current.emb.setColor(color); return this; }
+
+        setTitle(title) { this.current.tmp_emb.setTitle(title); return this; }
+        setDescription(description) { this.current.tmp_emb.setDescription(description); return this; }
+        setColor(color) { this.current.tmp_emb.setColor(color); return this; }
+
+        setAllowedIds(idArray) { this.allowedIds = idArray; return this; }
         addAllowedIds(idArray) {
             if (idArray instanceof Array === false) idArray = [idArray];
             if (typeof this.allowedIds === 'undefined') this.allowedIds = [];
             this.allowedIds = this.allowedIds.concat(idArray); return this;
         }
-        setAllowedIds(idArray) { this.allowedIds = idArray; return this; }
-        addField(title, text, inline = false) { this.current.emb.addField(title, text, inline); return this; }
-        setFooter(text, icon) { this.current.emb.setFooter(text, icon); return this; }
+        setOnEndFunction(func, ...args) { this.current.onEnd.func = func; this.current.onEnd.args = args; return this; }
+        setOnEndDefaultFunction(func, ...args) { this.onEnd.func = func; this.onEnd.args = args; return this; }
+        async send(channel) {
+            // Send the embed to the channel
+            let m = await channel.send(this.current.emb);
+            // Collector to create events for when someone reacts with an emoji
+            //  Discord.ReactionCollector(m, (_, user) => (user.id !== this.component.bot.user.id) && (typeof this.current.allowedIds === 'undefined' || this.current.allowedIds.indexOf(user.id) !== -1), {time:180000});
+            this.collector = new Discord.ReactionCollector(m,
+                // Only take the reactions into account that are in allowedIds - or all if allowedIds is not set
+                (_, user) => (user.id !== this.component.bot.user.id) && (typeof this.current.allowedIds === 'undefined' || this.current.allowedIds.indexOf(user.id) !== -1),
+                // The timeout for the Collector
+                { time: 180000 }
+            );
+            // TODO: Why do I have to set this here again? I have set it in the configs... but it somehow somewhere reset?
+            this.component.bot.setMaxListeners(this.component.bot.configs.maxListeners);
+            // Every time someone allowed reacts with an emoji
+            this.collector.on('collect', function (reaction) {
+                reaction.users.array().forEach(function(user) {
+                    if (user.id !== reaction.message.author.id) reaction.remove(user);
+                }, this);
+                let emoji = reaction.emoji.name;
+
+                // If it was a navigation... navigate!
+                if (emoji === this.current.navEmojis.next)
+                    return this.nextPage().update();
+                if (emoji === this.current.navEmojis.previous)
+                    return this.previousPage().update();
+                if (emoji === this.current.navEmojis.up)
+                    return this.previousCategory().update();
+
+                // Get the correct option (out of the ones that were added) to the emoji that was reacted with
+                // Either it was defined directly in the arguments -> then we can use .find
+                // Or we have to find it in the letterEmoji object and get the index of the option that way
+                let option = this.current.options.find(o => o.emoji === emoji)
+                        || this.current.options[this.component.bot.extensions.core.letterEmojis[emoji]];
+                if (!option) return;
+                try {
+                    // If we do have an option for the reaced emoji -> Call the function with its arguments
+                    option.func.apply(this.component, option.args);
+                } catch (e) { this.component.error(e, 'Something went wrong in the callback function of the menu!'); }
+                // We bind 'this' so we have access to the component (cmd/module/event/task) very important for the callback!
+            }.bind(this));
+            this.collector.on('end', function () {
+                this.collector.message.clearReactions();
+                if (this.current.onEnd) this.current.onEnd.apply(this.component, this.current.onEnd.args);
+                else if (this.onEndDefault) this.onEndDefault.apply(this.component, this.onEndDefault.args);
+            }.bind(this));
+            await this.upateEmojis();
+            return this;
+        }
+        async upateEmojis() {
+            let addreact = this.current.reactWith.filter(function (e) { return this.lastEmojis.indexOf(e) < 0; }.bind(this));
+            let subreact = this.lastEmojis.filter(function (e) { return this.current.reactWith.indexOf(e) < 0; }.bind(this));
+            if (addreact.length > 0) {
+                subreact.unshift(this.current.navEmojis.next);
+                subreact.unshift(this.current.navEmojis.previous);
+                if (this.current.reactWith.indexOf(this.current.navEmojis.previous) > 0)
+                    addreact.push(this.current.navEmojis.previous);
+                if (this.current.reactWith.indexOf(this.current.navEmojis.next) > 0)
+                    addreact.push(this.current.navEmojis.next);
+            }
+            let m = this.collector.message;
+            if (subreact.length > 0) {
+                let removeReacts = m.reactions.array().filter(reaction => subreact.indexOf(reaction.emoji.name) > -1);
+                for (let iReact = removeReacts.length-1; iReact > -1; iReact--) {
+                    let users = removeReacts[iReact].users.array();
+                    for (let iUser = 0; iUser < users.length; iUser++) {
+                        await removeReacts[iReact].remove(users[iUser]);
+                    }
+                }
+            }
+            for (let i = 0; i < addreact.length; i++) {
+                await m.react(addreact[i]);
+            }
+            return this;
+        }
+        // addField(title, text, inline = false) { this.current.tmp_emb.addField(title, text, inline); return this; }
+        setFooter(text, icon) { this.current.tmp_emb.setFooter(text, icon); return this; }
         addOption(title, text, emoji, func, ...args) {
             if (title instanceof Array) return this.addOption.apply(this, title);
             if (typeof emoji !== 'string') {
@@ -136,32 +171,45 @@ module.exports = {
                 func = emoji;
                 emoji = null;
             }
-            // Store the emoji and get a default one if none was handed in
-            emoji = emoji || this.context.bot.extensions.core.letterEmojis[this.current.reactWith.length];
-            if (emoji === '' || emoji === null || typeof emoji === 'undefined') return this;
-            if (emoji === 'none') emoji = '';
-            else {
-                this.current.options.push({title: title, text: text, func: func, args: args, emoji: emoji });
-                this.current.reactWith.push(emoji);
-                emoji += ' ';
-            }
-            // Add an inline field to the embed with the emoji as tile and the correct option text
-            this.current.emb.addField(emoji + title, text);
+            this.current.options.push({title: title, text: text, func: func, args: args, emoji: emoji });
             return this;
         }
-        /**
-         * This will NOT remove the collector or reactions of already sent menues!
-         * This is only to be able to reuse the object for later usages!
-         */
-        resetOptions() { this.emb.fields = []; this.reactWith = []; this.optioins = []; return this; }
-        setOnEndFunction(func, args = []) { this.onEnd.func = func; this.onEnd.args = args; return this; }
     },
-    menuPage: class {
-        constructor() {
+    menuCategory: class {
+        constructor(bot, pageSize = 5) {
+            this.bot = bot;
+            this.pageSize = pageSize;
+            this.index = 0;
             this.options = [];
             this.reactWith = [];
-            this.emb = new Discord.RichEmbed();
-            this.onEnd = {};
+            this.navEmojis = { previous: '⏪', next: '⏩', up: '⏫'};
+            this.tmp_emb = new Discord.RichEmbed();
+            this.onEnd = null;
+        }
+        get emb() {
+            this.tmp_emb.fields = [];
+            this.reactWith = [];
+            let max = Math.min(this.pageSize * (this.index + 1), this.options.length);
+            for (let i = this.index * this.pageSize; i < max; i++) {
+                let op = this.options[i];
+                // Store the emoji and get a default one if none was handed in
+                let emoji = op.emoji || this.bot.extensions.core.letterEmojis[this.reactWith.length];
+                if (emoji === '' || emoji === null || typeof emoji === 'undefined') return this;
+                if (emoji === 'none') emoji = '';
+                this.tmp_emb.addField(emoji && emoji !== '' ? emoji + ' ' + op.title : op.title, op.text);
+                if (emoji !== '') this.reactWith.push(emoji);
+            }
+            // Add the emojis to navigate depending on which are required
+            this.addNavReactions();
+            return this.tmp_emb;
+        }
+        addNavReactions() {
+            if (this.reactWith.indexOf(this.navEmojis.up) < 0) this.reactWith.unshift(this.navEmojis.up);
+            if (this.index > 0 && this.reactWith.indexOf(this.navEmojis.previous) < 0)
+                this.reactWith.push(this.navEmojis.previous);
+            if (this.options.length > this.pageSize * (this.index + 1) && this.reactWith.indexOf(this.navEmojis.next) < 0)
+                this.reactWith.push(this.navEmojis.next);
+            return this.reactWith;
         }
     }
 };

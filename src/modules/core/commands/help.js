@@ -1,6 +1,6 @@
 async function displayModuleHelp(menu, mod) {
     let help = mod.help(true);
-    menu.newPage()
+    menu.newCategory()
         .setTitle(help.title)
         .setDescription(help.text)
         .setFooter('To get more information about a Command just click on the corresponding emoji');
@@ -8,22 +8,18 @@ async function displayModuleHelp(menu, mod) {
         let help = c.help(false);
         menu.addOption(help.title, help.text, displayCommandHelp, menu, c);
     }, this);
-    menu.addOption.call(menu, 'Back:', 'Go Back!', back, menu, true, true)
-        .update(true);
+    menu.update(true);
 }
 
 async function displayCommandHelp(menu, cmd) {
     let help = cmd.help(true);
-    menu.newPage()
+    menu.newCategory()
         .setTitle(help.title)
         .setDescription(help.text)
         // This is actually hard to implement:
         // .setFooter('To run the command (without arguments) just click the corresponding emoji')
-        .addOption.call(menu, 'Back:', 'Go Back!', back, menu, true, true)
         .update(true);
 }
-
-function back(menu, updateLastMenu, updateEmojis ) { menu.previousPage(updateLastMenu, updateEmojis); }
 
 module.exports = {
     run: async function (message) {
