@@ -31,10 +31,12 @@ class ConfigManager {
     // TODO: expand!
     checkSettings() {
         let errors = [], warnings = [];
-        if (!this.bot.configs.owners || this.bot.configs.owners.length > 0)
-            warnings.push('You have not set up an owner! To have at least one owner is pretty important!');
         if (this.bot.configs.prefix === '' || typeof this.bot.configs.prefix === 'undefined')
             errors.push('You have chosen an empty prefix... that is not allowed.');
+        if (this.bot.configs.token === '' || typeof this.bot.configs.token === 'undefined')
+            errors.push('You have to set up your token!');
+        if (this.bot.configs.owners instanceof Array === false || this.bot.configs.owners.length === 0)
+            warnings.push('You have not set up an owner! To have at least one owner is pretty important!');
         if (this.bot.configs.debugFlags instanceof Array === false)
             warnings.push('The debugFlags are in a wrong format... have you put them inside \'[\'\']\'? If you want them empty set them to \'[]\'');
         if (this.bot.configs.defaultPermissions instanceof Array === false)

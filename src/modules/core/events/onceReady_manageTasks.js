@@ -1,6 +1,4 @@
 function run() {
-    this.log('Setting maxListeners to 200');
-    this.setMaxListeners(300);
 
 }
 

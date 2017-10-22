@@ -1,5 +1,5 @@
 # config files - don't wanna overwrite the example and show everyone my token / db credentials eh? :P
-/config.cfg
+/*.cfg
 mongoDBConfig.js
 
 # Logs
