@@ -14,15 +14,15 @@ function run(msg) {
 module.exports = {
     configs: function () {
         this.eventFunctions = [
-            {object: this.bot, event: 'message', function: run}
+            { object: this.bot, trigger: 'on', event: 'message', function: run }
         ];
         this.name = 'Auto Command & Botmessage cleanup';
         this.permissions = [];
         this.location = 'ALL';
         this.description = 'Automatically removes Commands and Bot messages after set time';
-        this.botMsgTime = 30000;
+        this.botMsgTime = 1800000;
         this.userCmdTime = 30000;
-        this.forceMode = 1; // 0: Do not force to delete messages, 1: Force deleting messages, 2: Force not deleting messages
+        this.forceMode = 0; // 0: Do not force to delete messages, 1: Force deleting messages, 2: Force not deleting messages
         this.debugMode = true;
         this.category = 'Debug';
         this.tags = ['Core', 'Debugging'];

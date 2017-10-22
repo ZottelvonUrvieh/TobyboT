@@ -7,7 +7,7 @@ module.exports = {
         // Here you can make an array of functions you want to be repeated every x milliseconds
         // x is a a changable config that is located in the config.cfg but it will influence ALL other modules aswell!
         this.repeatFunctions = [
-            {object: this.bot.taskManager, event: 'repeat', function: this.run}
+            {object: this.bot.taskManager, trigger:'on', event: 'repeat', function: this.run}
         ];
         // Displayname that gets shown in help etc.
         this.name = 'Reminder-Handler';

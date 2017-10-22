@@ -13,12 +13,12 @@ function connect() {
 module.exports = {
     configs: function () {
         this.eventFunctions = [
-            {object: this.bot, event: 'ready', function: connect},
+            { object: this.bot, trigger: 'on', event: 'ready', function: connect },
             // This doesn't seem to fire... maye it's because of the auto reconnect option?
-            {object: this.bot, event: 'disconnect', function: this.bot.moduleManager.disconnectCalls},
+            { object: this.bot, trigger: 'on', event: 'disconnect', function: this.bot.moduleManager.disconnectCalls },
             // Not yet used... maybe one of these is the one that should be used insead of 'disconnect'?
-            {object: this.bot, event: 'disconnect', function: this.bot.moduleManager.disconnectCalls},
-            {object: this.bot, event: 'disconnect', function: this.bot.moduleManager.disconnectCalls},
+            { object: this.bot, trigger: 'on', event: 'disconnect', function: this.bot.moduleManager.disconnectCalls },
+            { object: this.bot, trigger: 'on', event: 'disconnect', function: this.bot.moduleManager.disconnectCalls },
         ];
         this.name = 'Discord connection handler';
         this.permissions = [];

@@ -1,8 +1,6 @@
-// this class is the
 class Module {
     constructor(path, bot) {
         injectDebugAndLogging.call(this, bot);
-
         this.id = require('path').basename(path);
         let loadedData;
         try {
@@ -82,15 +80,16 @@ let injectDebugAndLogging = function (bot) {
 
     this.help = function (detailed) {
         if (detailed) return this.detailedHelp();
-        let retString = `__**${this.toString()}**__ (ID: ${this.id}):\n${this.description}`;
-        return retString;
+        let title = `__**${this.toString()}**__ (ID: ${this.id}):`;
+        let text = `${this.description}`;
+        return { title: title, text: text };
     };
 
     this.detailedHelp = function () {
-        let retString = `**${this.toString()}** (ID: ${this.id}):\n${this.description}`;
-        if (this.tags.length > 0) retString += `\n\n**Tags:** [${this.tags.join(', ')}]`;
-        else retString += '\n\n**Tags:** None';
-        return retString;
+        let title = `**${this.toString()}** (ID: ${this.id}):`;
+        let text = `${this.description}`;
+        if (this.tags.length > 0) text += `\n**Tags:** [${this.tags.join(', ')}]`;
+        return { text: text, title: title};
     };
 
     this.toDebugString = function () {

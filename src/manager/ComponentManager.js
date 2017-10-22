@@ -90,7 +90,7 @@ class ComponentManager {
         // Add listeners to EventEmitters
         if (event.functions && event.functions.length > 0)
             event.functions.forEach(function(elem) {
-                elem.object.on(elem.event, elem.function);
+                elem.object[elem.trigger](elem.event, elem.function);
             }, this);
         return event;
     }
@@ -110,7 +110,7 @@ class ComponentManager {
         // Add listeners to EventEmitters
         if (task.functions && task.functions.length > 0)
             task.functions.forEach(function(elem) {
-                elem.object.on(elem.event, elem.function);
+                elem.object[elem.trigger](elem.event, elem.function);
             }, this);
         this.tasks.push(task);
         mod.tasks.push(task);

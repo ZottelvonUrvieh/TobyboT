@@ -23,7 +23,8 @@ But I started completely fresh and rewrote everything from scratch so that is wh
     - [x] Get an idea of a structure that I like
     - [x] Check for correct stucture of implemented Methods
   - [ ] Implementation
-    - [x] MongoDB implementation
+    - [ ] MongoDB implementation
+      - [ ] Make it possible to use querries
       - [x] Creating Tables
       - [x] Inserting Documents
       - [x] deleteTable / setTableRows
@@ -34,7 +35,7 @@ But I started completely fresh and rewrote everything from scratch so that is wh
     - [x] CoreBot
     - [x] Module
     - [x] Command
-    - [ ] Discord Events
+    - [x] Discord Events
     - [ ] Event System for timed / repeated tasks
 - [x] **ErrorHandler**
     - [x] Integrated into the Core Module through events
@@ -44,11 +45,13 @@ But I started completely fresh and rewrote everything from scratch so that is wh
     - [x] Prefix changeing
     - [x] Adding / Removing owners
     - [x] Default permissions
-    - [x] General command to update any config that is in the file
-  - [ ] Persist config better than currently handled
+    - [x] General function to update any config that is in the file
+    - [ ] Make a command that accepts two arguments to use that general function
+  - [ ] Persist config better than currently handled (Is that neccessary?)
 - [ ] **ModuleManager**
   - [x] Reloading Modules
   - [x] Flexible Permission loading / unloading
+  - [ ] Code cleaning
 - [ ] **ComponentManager**
   - [x] Parsing Message into Command / Args
   - [x] Checking for several things before Command execution:
@@ -60,13 +63,16 @@ But I started completely fresh and rewrote everything from scratch so that is wh
   - [x] Reloading Commands
   - [x] Flexible Permission loading / unloading
   - [x] Manage duplicate cmd's / aliases
+  - [ ] Code cleaning
+  - [ ] Run command from Help?
 
-### **Modules:**
+### **Modules/Extensions:**
 - **Core:**
   - [x] Dynamic generated help for:
       - [x] Bot in general
       - [x] Modules
       - [x] Commands
+      - [ ] Make it automatically page when too much options
   - [x] Prefix changeing
   - [x] Reloading
       - [x] Commands
@@ -78,7 +84,7 @@ But I started completely fresh and rewrote everything from scratch so that is wh
         - [x] On Message received (tiwce actually - one for command handling one for automated deletion of messages)
         - [ ] On Discord disconnect ~~does not fire somehow...~~
 - **Core Additions:**
-  - [ ] Do I want to have them split up?
+  - [x] Do I want to have them split up?
   - [x] Ping
   - [x] Tags (mostly to test DB)
     - [x] Personal Tags
@@ -86,7 +92,49 @@ But I started completely fresh and rewrote everything from scratch so that is wh
 - **Logging:**
   - [ ] Make a TODO list
 - **Mafia:**
-  - [ ] Make a TODO list
+  - Manage / set up your games:
+    - [ ] New game
+    - [ ] List your games (and maybe list games you are mod in?)
+      - [ ] Select current game (all written commands will then be applied to that game when outside of a game channel or two games are going on in one channel)
+      - [ ] Delete a game
+    - [ ] Set game channel (the main chat channel)
+    - [ ] Set mafia channel
+    - [ ] Add/Remove/List Mods to the game
+    - [ ] Setting roles
+  - Functions for during the game:
+    - [ ] Votes
+      - [ ] Vote + Majority + Lynch + Channel-locking
+      - [ ] Votecount
+      - [ ] Day/Night timer + Channel-locking
+      - [ ] Timeleft
+      - [ ] Message Edits
+    - Prodtimers-Tracking:
+      - [ ] Command for listing all prodtimers for mods
+      - [ ] Command for setting the prodtimer of someone to x
+      - [ ] Message to mods on time up
+      - [ ] Rresetting timers on daystarts and message sent
+      - [ ] Tracking of PlayerRole to add/remove Prodtimers on player replacements
+  - Personal Ideas / random thoughts:
+    - [ ] Game-Pause/Resume Command
+    - [ ] Preposting of daystart message - if done the bot will automatically send it out and start the day when the time is up ~ How to handle wills tho? If they would be updated till then... or someone changes their nightaction...
+    - [ ] Resending of original message content on message edits
+    - Notifications:
+      - DM bot you want to get notified if someone gets voted on (all, or specified persons)
+      - Specify you want to get notified x amount of time before your prodtimer runs out
+      - Specify you want to get notified x amount of time before the day / night ends
+      - [ ] Menu for sending out Night results
+      - [ ] Whispers send to the bot in DM and depending on the settings of them they will be handled differently:
+      - [ ] Acknowlegement through mod - after they will be forwarded
+      - [ ] Forwarding to Spectator-Chat
+      - [ ] Forwarding to Game-Chat 'X Messaged Y'
+      - [ ] Forwarding to possible Power Roles
+    - [ ] Setting up game types (role lists) and auto-rolling
+    - [ ] Assigning Persons their roles (only bot intern - not Discord-Roles)
+    - [ ] Showing results and / or sending out rolecards with or without notifying mods who is who
+    - [ ] DMing Mafia / Other Roles the invites of other Servers
+    - [ ] Sending Bot wills -> Auto messages on daystart / lynches
+    - [ ] Sending Bot nightactions -> Auto night resolving / Suggesting of night results / Full game automation
+    - [ ] Night-skip voting
 - **Scores:**
   - [ ] Make a TODO list
 - **Moderation:**
@@ -98,4 +146,5 @@ But I started completely fresh and rewrote everything from scratch so that is wh
       - [ ] Show time for other people
   - **Pure Utility for other Modules:**
     - [ ] Send multiple messages without killing formating
+    - [x] Menu Extension for easy to create and consistent menus throught the whole bot
     - [ ] ...

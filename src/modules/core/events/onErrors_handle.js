@@ -12,11 +12,11 @@ function rejectOrErrFilterDiscord (reason, p) {
 module.exports = {
     configs: function () {
         this.eventFunctions = [
-            { object: this.bot,     event: 'error',                 function: this.error                },
-            { object: this.bot,     event: 'warn',                  function: this.warn                 },
-            { object: this.bot,     event: 'debug',                 function: this.bot.discordDebug     },
-            { object: process,      event: 'uncaughtException',     function: rejectOrErrFilterDiscord  },
-            { object: process,      event: 'unhandledRejection',    function: rejectOrErrFilterDiscord  }
+            { object: this.bot, trigger: 'on', event: 'error',              function: this.error },
+            { object: this.bot, trigger: 'on', event: 'warn',               function: this.warn },
+            { object: this.bot, trigger: 'on', event: 'debug',              function: this.bot.discordDebug },
+            { object: process,  trigger: 'on', event: 'uncaughtException',  function: rejectOrErrFilterDiscord },
+            { object: process,  trigger: 'on', event: 'unhandledRejection', function: rejectOrErrFilterDiscord }
         ];
         this.name = 'Core Error Handler';
         this.permissions = [];

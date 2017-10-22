@@ -25,7 +25,6 @@ Promise.prototype.delay = function (fn, t) {
 let http = require('http');
 
 module.exports = {
-    // eslint-disable-next-line
     run: async function (message, args) {
         // Get the stored text + timestamp (if game is running in this channel)
         let guessObj = this.typeIt[message.channel.id];
@@ -34,8 +33,9 @@ module.exports = {
             if (args[0] !== 'new') {
                 if (guessObj.timestamp === false) return message.delete();
                 if (guessObj.text === message.content) {
-                    // We got a winner and deleting the text to be ready to beginn a new game
-                    message.channel.send(`**YAAAAY!** ${message.author} wins!\nIt took ${(Date.now() - guessObj.timestamp)/1000}s to answer.`);
+                    // We got a winner. Deleting the text to be ready to beginn a new game
+                    let seconds = (Date.now() - guessObj.timestamp) / 1000;
+                    message.channel.send(`**YAAAAY!** ${message.author} wins!\nIt took ${seconds}s to answer. That are ${Math.round(guessObj.text.length * 100 / seconds) / 100} chars / second!`);
                     return delete this.typeIt[message.channel.id];
                 }
                 else return message.channel.send(`**WRONG!**\You should write:\`\`\`${guessObj.text}\`\`\``);
@@ -49,13 +49,13 @@ module.exports = {
             res.setEncoding('utf8');
             res.on('data', data => {
                 guessObj.author = JSON.parse(data.toString('utf8'))[0].title;
-                guessObj.text = `${this.bot.configs.prefix}${this.cmd} ${JSON.parse(data.toString('utf8'))[0].content.slice(3,-5).trim()}`;
+                guessObj.text = `${this.bot.configs.prefix}${this.cmd} ${JSON.parse(data.toString('utf8'))[0].content.slice(3, -5).trim().replace('’', '\'').replace('&#8217;','\'')}`;
             });
         });
         this.typeIt[message.channel.id] = guessObj;
 
         // Send initial message
-        let text = `You can already type in \`${this.bot.configs.prefix}${this.cmd} \` as that is what it will start with ;)nRound will start in `;
+        let text = `You can already type \`${this.bot.configs.prefix}${this.cmd} \` as that is what the text will start with ;)\nRound will start in `;
         let timer = 3;
         let cText = `${text} ${timer}...`;
         let m = await message.channel.send(cText);

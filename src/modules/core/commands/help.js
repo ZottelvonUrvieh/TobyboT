@@ -1,95 +1,46 @@
-function generateMessages(headString, footerString, items, detailed) {
-    let itemStrings = [];
-    let msgsStrings = [];
-
-    // Generate the descriptions for the items
-    items.forEach(function (item) {
-        itemStrings.push(item.help(detailed));
+async function displayModuleHelp(menu, mod) {
+    let help = mod.help(true);
+    menu.newPage()
+        .setTitle(help.title)
+        .setDescription(help.text)
+        .setFooter('To get more information about a Command just click on the corresponding emoji');
+    mod.commands.forEach(c => {
+        let help = c.help(false);
+        menu.addOption(help.title, help.text, displayCommandHelp, menu, c);
     }, this);
-
-    msgsStrings.push(headString);
-
-    // Make sure we never excede 2000 chars in one message and have the header on top and the footer on bottom.
-    for (let index = 0; index < itemStrings.length; index++) {
-        let itemString = `\n${itemStrings[index]}\nㅤ`;
-        let cString = msgsStrings.pop();
-        if (cString.length + itemString.length < 2000)
-            msgsStrings.push(cString + itemString);
-        else {
-            msgsStrings.push(cString);
-            msgsStrings.push(itemString);
-        }
-        if (index < itemStrings.length - 1) continue;
-        cString = msgsStrings.pop();
-        if (cString.length + footerString.length < 2000)
-            msgsStrings.push(cString + footerString);
-        else {
-            msgsStrings.push(cString);
-            msgsStrings.push(footerString);
-        }
-    }
-    return msgsStrings;
+    menu.addOption.call(menu, 'Back:', 'Go Back!', back, menu, true, true)
+        .update(true);
 }
 
-async function displayGeneralHelp(message, cmd) {
-    let headString = '**Currently loaded Bot-Modules**\n';
-    let footerString = `ㅤ\nTo get more information about the individual modules use \`${cmd.bot.configs.prefix}${cmd.cmd} moduleID\`ㅤ`;
-
-    // Generate all the text for the (possibly) multiple messages
-    let msgsStrings = generateMessages(headString, footerString, cmd.bot.moduleManager.modules, false);
-
-    // Send all messages and delete them after 60 seconds.
-    msgsStrings.map(async msgSring => { return await message.channel.send(msgSring); });
-    return true;
+async function displayCommandHelp(menu, cmd) {
+    let help = cmd.help(true);
+    menu.newPage()
+        .setTitle(help.title)
+        .setDescription(help.text)
+        // This is actually hard to implement:
+        // .setFooter('To run the command (without arguments) just click the corresponding emoji')
+        .addOption.call(menu, 'Back:', 'Go Back!', back, menu, true, true)
+        .update(true);
 }
 
-async function displayModuleHelp(message, id, cmd) {
-    let mod = cmd.bot.moduleManager.getModuleByID(id);
-    if (!mod) return false;
-    let headString =  `${mod.help()} \n\n**This mod includes the commands:**\n`;
-    let footerString = `ㅤ\nTo get more information about the individual Commands use \`${cmd.bot.configs.prefix}${cmd.cmd} commandOrAlias\`ㅤ`;
-
-    // Generate all the text for the (possibly) multiple messages
-    let msgsStrings = generateMessages(headString, footerString, mod.commands, false);
-
-    // Send all messages and delete them after 60 seconds.
-    msgsStrings.map(async msgSring => { return await message.channel.send(msgSring); });
-    return true;
-}
-
-async function displayCommandHelp(message, callable, cmd) {
-    cmd = cmd.bot.componentManager.getCommandByCallable(callable);
-    if (!cmd) return false;
-    // Generate all the text for the (possibly) multiple messages
-    message.channel.send(cmd.help(true));
-    return true;
-}
+function back(menu, updateLastMenu, updateEmojis ) { menu.previousPage(updateLastMenu, updateEmojis); }
 
 module.exports = {
-    run: async function (message, args) {
-        let success;
-        if (args.length === 0) {
-            success = await displayGeneralHelp(message, this);
-        }
-        if (!success) {
-            success = await displayModuleHelp(message, args[0], this);
-        }
-        if (!success) {
-            success = await displayCommandHelp(message, args[0], this);
-        }
-        if (success) return;
-        // TODO: Throw an error and add the feature of then showing usage insead of doing this.
-        message.channel.send(`Nothing found... what do you mean with \`${args[0]}\`?`);
+    run: async function (message) {
+        // Display general help - overview over all available Modules
+        let menu = new this.bot.extensions.core.menu(this)
+            .setTitle(`**Hello ${message.author.username}! I am Toby and I am a bot!**`)
+            .setDescription('This is my help menu.\nYou can navigate it using the emoji reactions underneath.' +
+            'Only yours will be counted.\n**Currently installed modules are:**');
+        this.bot.moduleManager.modules.forEach(function (m) {
+            menu.addOption(m.help(false).title, m.help(false).text, displayModuleHelp, menu, m);
+        }, this);
+        menu.setFooter('To get more information about an item just click on the corresponding emoji')
+            .addAllowedIds(message.author.id)
+            .send(message.channel);
     },
 
-    // all settings but cmd and location are optional - the other are just to increase useability
     configs: function () {
-        // You can add your own individual settings and variables here if you like
-        // (accessable with this.yourSetting in the run function aswell)
-        // You could edit everything aswell in the run function but that won't persist!
-        // So for clearity I would highly recommend to use this here for settings that are not
-        // needed to be changed dynamically
-
         // Displayname that gets shown in help etc.
         this.name = 'Help';
         // Command that will be used to trigger the bot to execute the run function
@@ -104,7 +55,7 @@ module.exports = {
         this.description = 'Can give an overview what commands are available and what they do.';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function() {
-            return  `General help: \`${this.bot.configs.prefix}${this.cmd}\`\n` +
+            return  `General help-menu: \`${this.bot.configs.prefix}${this.cmd}\`\n` +
                     `Module specific help: \`${this.bot.configs.prefix}${this.cmd} moduleID\`` +
                     `Command specific help: \`${this.bot.configs.prefix}${this.cmd} commandName\``;
         };

@@ -6,7 +6,7 @@ function run(msg) {
 module.exports = {
     configs: function () {
         this.eventFunctions = [
-            {object: this.bot, event: 'message', function: run}
+            { object: this.bot, trigger: 'on', event: 'message', function: run}
         ];
         this.name = 'Command parsing & executing';
         this.permissions = [];

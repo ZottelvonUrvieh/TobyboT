@@ -52,7 +52,7 @@ module.exports = {
     config: function () {
         return {
             name: 'Mafia Module',
-            description: 'Some minigames - for example for Survivior!',
+            description: 'Set up and play Mafia - helps you with moderating it!',
             tags: ['Games', 'Fun'],           // Some tags for the menu (not implemented yet)
             permissions: ['MANAGE_MESSAGES'],    // Permissions your module requires (eg. MANAGE_MESSAGES)
             debugMode: false,   // whether or not to show the debug messages in the console
