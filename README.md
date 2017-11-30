@@ -36,7 +36,7 @@ But I started completely fresh and rewrote everything from scratch so that is wh
     - [x] Module
     - [x] Command
     - [x] Discord Events
-    - [ ] Event System for timed / repeated tasks
+    - [x] Event System for timed / repeated tasks
 - [x] **ErrorHandler**
     - [x] Integrated into the Core Module through events
 - [ ] **Configuration manager**
@@ -64,7 +64,7 @@ But I started completely fresh and rewrote everything from scratch so that is wh
   - [x] Flexible Permission loading / unloading
   - [x] Manage duplicate cmd's / aliases
   - [ ] Code cleaning
-  - [ ] Run command from Help?
+  - [x] Run command from Help?
 
 ### **Modules/Extensions:**
 - **Core:**
@@ -72,7 +72,6 @@ But I started completely fresh and rewrote everything from scratch so that is wh
       - [x] Bot in general
       - [x] Modules
       - [x] Commands
-      - [ ] Make it automatically page when too much options
   - [x] Prefix changeing
   - [x] Reloading
       - [x] Commands
@@ -93,14 +92,22 @@ But I started completely fresh and rewrote everything from scratch so that is wh
   - [ ] Make a TODO list
 - **Mafia:**
   - Manage / set up your games:
-    - [ ] New game
-    - [ ] List your games (and maybe list games you are mod in?)
-      - [ ] Select current game (all written commands will then be applied to that game when outside of a game channel or two games are going on in one channel)
-      - [ ] Delete a game
-    - [ ] Set game channel (the main chat channel)
-    - [ ] Set mafia channel
-    - [ ] Add/Remove/List Mods to the game
-    - [ ] Setting roles
+    - [x] New game
+    - [x] List your games
+    - [ ] List games you mod in
+    - [ ] Add some permissions for mods in a game
+    - [x] Select current game (all written commands will then be applied to that game when outside           of a game channel or two games are going on in one channel)
+    - [x] Delete game
+    - [x] Duplicate game
+    - [x] Show JSON of game
+    - [x] Set JSON data of game - easy sharing / modifying
+      - [x] Start-Phase command
+      - [ ] Set game channel (the main chat channel)
+      - [x] Add/Remove/List Mods to the game
+      - [ ] Set mafia channel
+      - [ ] Assign Discord-Roles to Game-Alignments (eg Player, Mafia, Mason...)
+    - [x] Phase-Checking
+    - [ ] Menu using the core extension WIP
   - Functions for during the game:
     - [ ] Votes
       - [ ] Vote + Majority + Lynch + Channel-locking
@@ -145,6 +152,15 @@ But I started completely fresh and rewrote everything from scratch so that is wh
       - [ ] Register own timezone
       - [ ] Show time for other people
   - **Pure Utility for other Modules:**
+    - [ ] Menu-Extension:
+      - [x] Emoji-Reaction control
+      - [x] Message-Reaction + automatic stopping them again
+      - [x] Options with custom functions as callbacks
+      - [x] Option-Paging
+      - [x] Timeout-Reaction-Cleaning
+      - [x] Store previous menu pages
+      - [x] Go up menu page (+ to specific one)
+      - [x] Chainable functions for easier usage
+      - [ ] Add customizable timeout function
     - [ ] Send multiple messages without killing formating
-    - [x] Menu Extension for easy to create and consistent menus throught the whole bot
     - [ ] ...

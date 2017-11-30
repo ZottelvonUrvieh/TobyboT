@@ -1,6 +1,6 @@
 module.exports = {
-    run: async function ( mod ) {
-        mod.log('hheeeayyhafjekjk');
+    run: async function () {
+        // TODO: Implement
     },
 
     configs: function () {
@@ -37,5 +37,8 @@ module.exports = {
         this.ownersOnly = false;
         // If this is > 0 the event autoCleanup will delete user messages with this command after these amount of ms
         this.autoDelete = 10000;
+        // To be able to acces this inside the callback functions
+        self = this;
     }
 };
+let self = null;

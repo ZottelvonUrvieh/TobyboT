@@ -1,6 +1,6 @@
 module.exports = {
-    run: async function ( ) {
-        self.log('This is coming from the exampleTask you still have in your module :P');
+    run: async function (old_msg, new_msg) {
+        // TODO: Implement
     },
 
     configs: function () {
@@ -9,7 +9,7 @@ module.exports = {
         // Here you can make an array of functions you want to be repeated every x milliseconds
         // x is a a changable config that is located in the config.cfg but it will influence ALL other modules aswell!
         this.eventFunctions = [
-            {object: this.bot, trigger: 'on', event: 'message', function: this.run}
+            { object: this.bot, trigger: 'on', event: 'messageUpdate', function: this.run}
         ];
         // Displayname that gets shown in help etc.
         this.name = 'Reminder-Handler';

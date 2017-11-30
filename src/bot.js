@@ -18,6 +18,7 @@ bot.taskManager = new EventEmitter();
 bot.moduleManager = new ModuleManager(bot);
 bot.componentManager = new ComponentManager(bot);
 bot.dbManager = new DBManager(bot);
+
 bot.log('Waiting for bot to log in...');
 bot.login(bot.configs.token).catch(e => {
     bot.warn('Login failed! Have you edited the config.cfg with your correct token and are you connected to the internet?');

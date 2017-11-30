@@ -9,7 +9,7 @@ class MongoDBHandler extends DBInterface{
         // TODO: do we require a disconnect?
         this.disconnectDB = function () { };
 
-        this.local  = false;
+        this.local  = true;
         this.tables = {};
 
         this.setup();
@@ -33,7 +33,12 @@ class MongoDBHandler extends DBInterface{
         if (this.db._readyState === 1 || this.db._readyState === 2)
             return;
         this.log('Connecting to MongoDB...');
-        mongoose.connect(this.bot.configs.mongoDBurl, { useMongoClient: true }).catch((e) => {this.warn(e); }); // we handle errors with the function: this.db.on
+        let options = {
+            reconnectTries: Number.MAX_VALUE,
+            reconnectInterval: 1000,
+            useMongoClient: true
+        };
+        mongoose.connect(this.bot.configs.mongoDBurl, options).catch((e) => {this.warn(e); }); // we handle errors with the function: this.db.on
         this.db.once('open', function () {
             this.log('Successfully connected to MongoDB.');
         }.bind(this));

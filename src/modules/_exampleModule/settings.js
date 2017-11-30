@@ -16,14 +16,14 @@ module.exports = {
     // Keep in mind, this may be called multiple times. (E.g.manually reloading module)
     // (And yes this is different than pre_init as modules can be unloaded and reloaded. Doing so this would get executed
     // again but pre_init wouldn't. Just how I built the reload everything command (`reload` without parameters
-    // that is) is that it unloads all Modules and Commands and then reinitializes them from scratch)
+    // that is) is that it unloads all Modules and Commands and then reinitialized them from scratch)
     module_load: function () {
         this.debug('In module_load!');
     },
 
     // Called when bot starts, before login into Discord, after the commands got loaded. One time only.
     init: function () {
-        // this.log(`in init`);
+        // this.log('in init');
         this.debug('In init!');
     },
 
@@ -41,16 +41,17 @@ module.exports = {
 
     // Called when module gets unloaded after the commands got unloaded.
     // Keep in mind, this may be called multiple times.
-    psot_module_unload: function () {
+    post_module_unload: function () {
         this.debug('In module_unload!');
     },
 
-    // Called when the bot disconnects from Discord - Carefull! This might be called more less often than connect!
+    // Called when the bot disconnects from Discord - Careful! This might be called more less often than connect!
     disconnect: function () {
         this.debug('In disconnect!');
     },
 
-    // same as for commands: Accessable with 'this.property' in the functions above
+    // Same as for commands: Accessible with 'this.property' in the functions above
+    // And you are able to add your own settings to be used in here and/or in commands via command.mod.property
     config: function () {
         return {
             name: 'Example Module',

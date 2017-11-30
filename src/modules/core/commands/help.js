@@ -1,4 +1,4 @@
-async function displayModuleHelp(menu, mod) {
+async function displayModuleHelp(menu, mod, message) {
     let help = mod.help(true);
     menu.newCategory()
         .setTitle(help.title)
@@ -6,34 +6,36 @@ async function displayModuleHelp(menu, mod) {
         .setFooter('To get more information about a Command just click on the corresponding emoji');
     mod.commands.forEach(c => {
         let help = c.help(false);
-        menu.addOption(help.title, help.text, displayCommandHelp, menu, c);
+        menu.addOption(help.title, help.text, displayCommandHelp, menu, c, message);
     }, this);
     menu.update(true);
 }
 
-async function displayCommandHelp(menu, cmd) {
+async function displayCommandHelp(menu, cmd, message) {
     let help = cmd.help(true);
     menu.newCategory()
         .setTitle(help.title)
         .setDescription(help.text)
-        // This is actually hard to implement:
-        // .setFooter('To run the command (without arguments) just click the corresponding emoji')
-        .update(true);
+        .setFooter('Not all commands can be executed without arguments!')
+        .addOption('Execute command with no arguments', 'ㅤ', function() {
+            cmd.bot.componentManager.runCommand({ msg: message, cmd: cmd, args: [] });
+        })
+        .update();
 }
 
 module.exports = {
     run: async function (message) {
         // Display general help - overview over all available Modules
-        let menu = new this.bot.extensions.core.menu(this)
+        let menu = new this.bot.extensions.core.Menu(this, 4)
             .setTitle(`**Hello ${message.author.username}! I am Toby and I am a bot!**`)
             .setDescription('This is my help menu.\nYou can navigate it using the emoji reactions underneath.' +
-            'Only yours will be counted.\n**Currently installed modules are:**');
-        this.bot.moduleManager.modules.forEach(function (m) {
-            menu.addOption(m.help(false).title, m.help(false).text, displayModuleHelp, menu, m);
+            'Only your interactions will be counted.\n**Currently installed modules are:**')
+            .setFooter('To get more information about an item just click on the corresponding emoji')
+            .addAllowedIds(message.author.id);
+        this.bot.moduleManager.modules.forEach(function (mod) {
+            menu.addOption(mod.help(false).title, mod.help(false).text, displayModuleHelp, menu, mod, message);
         }, this);
-        menu.setFooter('To get more information about an item just click on the corresponding emoji')
-            .addAllowedIds(message.author.id)
-            .send(message.channel);
+        menu.send(message.channel);
     },
 
     configs: function () {
@@ -51,9 +53,7 @@ module.exports = {
         this.description = 'Can give an overview what commands are available and what they do.';
         // Gets shown in specific help and depening on setting (one below) if a command throws an error
         this.usage = function() {
-            return  `General help-menu: \`${this.bot.configs.prefix}${this.cmd}\`\n` +
-                    `Module specific help: \`${this.bot.configs.prefix}${this.cmd} moduleID\`` +
-                    `Command specific help: \`${this.bot.configs.prefix}${this.cmd} commandName\``;
+            return  `General help-menu: \`${this.bot.configs.prefix}${this.cmd}\`\n`;
         };
         // Makes the bot message how to use the command correctly if you throw an exception
         this.showUsageOnError = false;

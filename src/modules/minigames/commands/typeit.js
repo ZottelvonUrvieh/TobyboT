@@ -1,28 +1,5 @@
-// utility function for returning a promise that resolves after a delay
-function delay(t) {
-    return new Promise(function (resolve) {
-        setTimeout(resolve, t);
-    });
-}
-
-Promise.delay = function (fn, t) {
-    // fn is an optional argument
-    if (!t) {
-        t = fn;
-        fn = function () {};
-    }
-    return delay(t).then(fn);
-};
-
-Promise.prototype.delay = function (fn, t) {
-    // return chained promise
-    return this.then(function () {
-        return Promise.delay(fn, t);
-    });
-
-};
-
-let http = require('http');
+let Canvas = require('canvas');
+let https = require('https');
 
 module.exports = {
     run: async function (message, args) {
@@ -31,27 +8,56 @@ module.exports = {
         if (guessObj) {
             // if we want to skip the current text and generate a new one
             if (args[0] !== 'new') {
-                if (guessObj.timestamp === false) return message.delete();
+                if (guessObj.timestamp === false) {
+                    return message.delete();
+                }
                 if (guessObj.text === message.content) {
                     // We got a winner. Deleting the text to be ready to beginn a new game
                     let seconds = (Date.now() - guessObj.timestamp) / 1000;
                     message.channel.send(`**YAAAAY!** ${message.author} wins!\nIt took ${seconds}s to answer. That are ${Math.round(guessObj.text.length * 100 / seconds) / 100} chars / second!`);
                     return delete this.typeIt[message.channel.id];
                 }
-                else return message.channel.send(`**WRONG!**\You should write:\`\`\`${guessObj.text}\`\`\``);
+                else {
+                    // let picLink =
+                    let orig = await message.channel.fetchMessage(guessObj.originMsg);
+                    // this.warn(msgs.id + ' --  ' + msgs.attachments.array()[0] + ' -- ' + msgs.attachments.size);//.attachments.array()[0].url;
+                    return message.channel.send(`**WRONG!**\nYou should write:\n${orig.attachments.array()[0].url}`);
+                }
             }
         }
-        guessObj = { text: '', timestamp: false };
-        // Get the quote
-        const url =
-        'http://quotesondesign.com/wp-json/posts?filter[orderby]=rand&filter[posts_per_page]=1';
-        http.get(url, res => {
-            res.setEncoding('utf8');
-            res.on('data', data => {
-                guessObj.author = JSON.parse(data.toString('utf8'))[0].title;
-                guessObj.text = `${this.bot.configs.prefix}${this.cmd} ${JSON.parse(data.toString('utf8'))[0].content.slice(3, -5).trim().replace('’', '\'').replace('&#8217;','\'')}`;
+        guessObj = { text: '', timestamp: false, originMsg: null };
+        // Get the quote from this url
+        const url = 'https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang=en';
+        let canvas = new Canvas(400, 150);
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'white';
+        // If we would want to fill the background:
+        // ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const txtWrapper = require('canvas-text-wrapper');
+        function setup(self) {
+            https.get(url, res => {
+                res.setEncoding('utf8');
+                res.on('data', data => {
+                    let quote;
+                    // If JSON parsing fails repeat fetching of quote
+                    try {
+                        quote = JSON.parse(data.toString());
+                    } catch (e) { self.log(data.toString()); return setup(self); }
+                    guessObj.author = !quote.quoteAuthor || quote.quoteAuthor === '' ? 'unknown' : quote.quoteAuthor.trim();
+                    guessObj.text = `${self.bot.configs.prefix}${self.cmd} ${quote.quoteText.trim()}`;
+                    // For 'testing' (cheating) purposes I leave this in here... :D
+                    self.log(guessObj.text);
+                    txtWrapper.CanvasTextWrapper(canvas, guessObj.text, {
+                        textAlign: 'left',
+                        verticalAlign: 'middle',
+                        strokeText: true,
+                        sizeToFill: true
+                    });
+                });
             });
-        });
+        }
+        setup(this);
+
         this.typeIt[message.channel.id] = guessObj;
 
         // Send initial message
@@ -65,10 +71,15 @@ module.exports = {
                 cText = `${text} ${timer}...`;
             else {
                 // This is the quote text + author --- The race starts :)
-                cText =  `Write this:\`\`\`\n${guessObj.text}\n\`\`\`\`${guessObj.author}\``;
+                cText = ''; //`Write this:\`\`\`\n${guessObj.text}\n\`\`\`\`${guessObj.author}\``;
                 guessObj.timestamp = Date.now();
                 // Safe the object in a variable located in the command to access it on later executions of run
                 this.typeIt[message.channel.id] = guessObj;
+                m.delete();
+                let originMsg = await m.channel.send(`Type this quote from **${guessObj.author}**:`,
+                    { file: { attachment: canvas.createPNGStream(), name: guessObj.author + '.png' } }
+                );
+                guessObj.originMsg = originMsg.id;
             }
             return await m.edit(cText);
         }.bind(this);

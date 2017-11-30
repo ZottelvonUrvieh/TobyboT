@@ -15,7 +15,5 @@ module.exports = {
         this.debugMode = true;
         this.category = 'Debug';
         this.tags = ['Core', 'Debugging'];
-        self = this;
     }
 };
-let self = null;

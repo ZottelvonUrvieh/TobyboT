@@ -26,16 +26,16 @@ class ModuleComponent {
 let InjectDebugAndLogging = function (bot) {
     this.debug = function (output) {
         if (bot.configs.debugFlags.indexOf('dependant') !== -1 && (this.debugMode === true || this.mod.debugMode === true))
-            bot.debug(output, `${this.toLog()}: `);
+            bot.debug(output, `${this.toLog() ? this.toLog() : ''}: `);
     };
     this.log = function (output) {
-        bot.log(output, `${this.toLog()}: `);
+        bot.log(output, `${this.toLog() ? this.toLog() : ''}: `);
     };
     this.warn = function (output) {
-        bot.warn(output, `${this.toLog()}: `);
+        bot.warn(output, `${this.toLog() ? this.toLog() : ''}: `);
     };
     this.error = function (output) {
-        bot.error(output, `${this.toLog()}:\n`);
+        bot.error(output, `${this.toLog() ? this.toLog() : ''}:\n`);
     };
     this.toString = function () {
         return `[${this.mod.name}] - ${this.name}`;

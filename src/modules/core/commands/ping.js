@@ -1,8 +1,25 @@
 module.exports = {
-    run: async function (message, ) {
+    run: async function (message, args) {
         let m = await message.channel.send(':thinking: Ping');
         m = await m.edit(':thinking: Ping...');
-        await m.edit(`:bulb: Pong! My responsiness is round about ${m.editedTimestamp - m.createdTimestamp}ms.`);
+        let postingStart = new Date();
+        let editText = '';
+        if (args.length > 0) {
+            await m.react('🔁');
+            let postingStop = new Date();
+            let reaction = m.reactions.array()[0];
+            let removingStart = new Date();
+            await reaction.remove();
+            let removingStop = new Date();
+            editText = `:bulb: **__Pong!__**\nGeneral Ping: **${m.editedTimestamp - m.createdTimestamp}ms**` +
+                `\nTime needed to respond to your command: **${m.createdTimestamp - message.createdTimestamp}ms**` +
+                `\nAdding emojis: **${postingStop - postingStart}ms**` +
+                `\nRemoving emojis: **${removingStop - removingStart}ms**`;
+        }
+        else {
+            editText = `:bulb: **__Pong!__**\nMy responsiness is round about **${m.editedTimestamp - m.createdTimestamp}ms**`;
+        }
+        await m.edit(editText);
     },
 
     configs: function () {

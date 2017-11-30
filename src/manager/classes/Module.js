@@ -81,17 +81,24 @@ let injectDebugAndLogging = function (bot) {
     this.help = function (detailed) {
         if (detailed) return this.detailedHelp();
         let title = `__**${this.toString()}**__ (ID: ${this.id}):`;
-        let text = `${this.description}`;
+        let text = `${this.description} `;
         return { title: title, text: text };
     };
 
     this.detailedHelp = function () {
         let title = `**${this.toString()}** (ID: ${this.id}):`;
-        let text = `${this.description}`;
-        if (this.tags.length > 0) text += `\n**Tags:** [${this.tags.join(', ')}]`;
+        let text = this.description;
+        if (this.tags && this.tags.length > 0) {
+            // TODO: If you use markdown in this it duplicates that string after moving up and down in the menu... WHY?
+            text += ` - Tags: [${this.tags.join(', ')}]`;
+        }
+        // For safety a invisible character
+        text += ' ';
+        // let text = `${this.description} ${(this.tags && this.tags.length > 0) ? `\n**Tags:** [${this.tags.join(', ')}]` : ' '}`;
         return { text: text, title: title};
     };
 
+    // Lists all own poperties and their values - for debugging
     this.toDebugString = function () {
         let moduleObjectKeysAndType = [];
         for (let key in this) {

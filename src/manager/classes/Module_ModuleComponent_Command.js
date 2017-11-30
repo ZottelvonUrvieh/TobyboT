@@ -7,7 +7,7 @@ class Command extends ModuleComponent {
 
     detailedHelp () {
         let title = `**__${this.name}:__**`;
-        let text =  `${this.description}`;
+        let text =  `${this.description} `;
         text += `\n**Usage:** \n${this.usage()}`;
         text += `\n\n**Aliases:** \`${this.callables.join('`, `')}\``;
         // retString += `\n\nThis ${this.type} is part of the Module '${this.mod}' - (ModuleID: \`${this.mod.id}\`)`;
