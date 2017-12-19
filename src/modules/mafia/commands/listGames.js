@@ -1,4 +1,4 @@
-const helper = require('../functions/getGamesFromContext');
+const gameHelper = require('../functions/gameHelper');
 module.exports = {
     run: async function (msg, args) {
         let games;
@@ -12,7 +12,7 @@ module.exports = {
             if (games.length === 0) response = 'You are not listed as a mod in any game currently.';
         }
         else if (args[0] === 'here') {
-            games = await helper.getGamesFromContext(this, msg);
+            games = await gameHelper.getGamesFromContext(this, msg);
         }
         else return new Error('Wrong argument... allowed are "own", "modding", "here" and no argument');
         if (games && games.length > 0)

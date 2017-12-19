@@ -53,6 +53,7 @@ module.exports = {
         this.usage = function () {
             return  `Create / edit tags: \`\`\`${this.bot.configs.prefix}${this.cmd} edit nameOfTheTag This is some cool text.\`\`\`` +
                     `To delete tags leave the text empty: \`\`\`${this.bot.configs.prefix}${this.cmd} edit nameOfTheTag\`\`\`` +
+                    `Show all your tags: \`\`\`${this.bot.configs.prefix}${this.cmd} list\`\`\`` +
                     `Show a tag with: \`\`\`${this.bot.configs.prefix}${this.cmd} nameOfTheTag\`\`\``;
         };
         // Makes the bot message how to use the command correctly if you throw an exception

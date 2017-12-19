@@ -1,5 +1,6 @@
 module.exports = {
     mManageRoles: async function (msg, cmd, menu, game) {
+        // TODO: CURRENTLY DOES NOT WORK! WIP
         menu.newCategory('m_roles', 9, false, true);
         game.settings = game.settings || {};
         game.settings.roles = game.settings.roles || [];

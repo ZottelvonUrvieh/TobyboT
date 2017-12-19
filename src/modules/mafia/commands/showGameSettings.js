@@ -4,7 +4,7 @@ let embedify = function (obj) {
     for (let key in obj) {
         if (key.startsWith('_')) continue;
         if (obj.hasOwnProperty(key)) {
-            if (key !== 'settings') emb.addField(key, obj[key] + 'ㅤ');
+            if (['settings', 'current'].indexOf(key) === -1) emb.addField(key, obj[key] + 'ㅤ');
             else {
                 for (let setting in obj[key]) {
                     if (obj[key][setting] instanceof Array) {

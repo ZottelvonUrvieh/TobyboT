@@ -75,7 +75,8 @@ module.exports = {
                     return;
                 }
                 collector.stop();
-                let game = { owner_id: msg.author.id, name: msg.cleanContent, selected: false, server_ids: [], mod_ids: [], settings: {} };
+                let game = Object.assign({}, cmd.mod.standardGame);
+                game.owner_id = msg.author.id; game.name = msg.cleanContent;
                 await cmd.bot.dbManager.insertTableRows(cmd.mod.mafiaDBTable, [game]);
                 menu.up('list_games', true);
                 await cmd.games.mListGames(msg, cmd, menu, game);

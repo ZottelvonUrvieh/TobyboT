@@ -89,7 +89,10 @@ But I started completely fresh and rewrote everything from scratch so that is wh
     - [x] Personal Tags
     - [x] Guildwide Tags
 - **Logging:**
-  - [ ] Make a TODO list
+  - [x] Be able to log channels
+  - [x] Let the bot msg you the file
+  - [x] Fancyness of Markdown (embed support, images, etc)
+  - [x] Make it smart so it only downloads the latest not yet loaded messages
 - **Mafia:**
   - Manage / set up your games:
     - [x] New game
@@ -149,8 +152,10 @@ But I started completely fresh and rewrote everything from scratch so that is wh
 - **Utilities:**
   - **Commands:**
     - [ ] Timezones
-      - [ ] Register own timezone
-      - [ ] Show time for other people
+      - [x] Register own timezone
+      - [x] Show time for other people
+      - [x] Show time difference
+      - [ ] Convert times
   - **Pure Utility for other Modules:**
     - [ ] Menu-Extension:
       - [x] Emoji-Reaction control

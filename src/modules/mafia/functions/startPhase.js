@@ -46,20 +46,22 @@ module.exports = {
         await component.bot.dbManager.setTableRowByKey(component.mod.mafiaDBTable, { owner_id: game.owner_id, name: game.name }, game);
 
         // Handle channel locking - or whatever we want to do on a phase end with a channel...
-        // Could easily copy this to do specific things for all individual roles as well.
+        // Could easily modify this to do specific things for all individual roles as well.
         for (let game_channel of game.settings.channels) {
             // If the game_channel is only the preset that came with the game initialization - do nothing with it.
-            if (game_channel.guild === -1 || game_channel.channel === -1) continue;
+            // Only double equals on purpose! We want to compare numbers to strings aswell!
+            if (game_channel.guild == -1 || game_channel.channel == -1) continue;
             let channel = component.bot.guilds.get(game_channel.guild).channels.get(game_channel.channel);
             if (channel) {
                 // TODO: This is where rules will come into play later on... for now hardwire daychat and mafiachat
                 //if ()
-                for (let role_id of game.settings.roles.filter(r => r.guild === channel.guild.id)) {
-                    let role = channel.guild.roles.get(role_id);
-                    // For now just overwrite the permissions of all roles to be not able to write
-                    channel.overwritePermissions(role, {'SEND_MESSAGES': false, 'ATTACH_FILES': false});
+                for (let role of game.settings.roles.filter(rol => rol.guild === channel.guild.id)) {
+                    role = channel.guild.roles.get(role.role);
+                    // For now just overwrite the permissions of all game roles to be not able to write to test if it works
+                    channel.overwritePermissions(role, { 'SEND_MESSAGES': false });
                 }
-                channel.send(`It is now **${phaseName}** till ${game.current.phase_end}`);
+                let d = new Date(game.current.phase_end);
+                channel.send(`It is now **${phaseName}** till ${game.current.phase_end == Number.MAX_SAFE_INTEGER ? 'a mod decides to do something :D' : d.toLocaleString('en-US', { timeZone: 'UTC', timeZoneName: 'short'})}`);
             }
         }
     }
