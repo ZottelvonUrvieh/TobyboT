@@ -88,16 +88,12 @@ But I started completely fresh and rewrote everything from scratch so that is wh
   - [x] Tags (mostly to test DB)
     - [x] Personal Tags
     - [x] Guildwide Tags
-- **Logging:**
-  - [x] Be able to log channels
-  - [x] Let the bot msg you the file
-  - [x] Fancyness of Markdown (embed support, images, etc)
-  - [x] Make it smart so it only downloads the latest not yet loaded messages
 - **Mafia:**
   - Manage / set up your games:
     - [x] New game
     - [x] List your games
     - [ ] List games you mod in
+    - [ ] List games you play in
     - [ ] Add some permissions for mods in a game
     - [x] Select current game (all written commands will then be applied to that game when outside           of a game channel or two games are going on in one channel)
     - [x] Delete game
@@ -105,25 +101,25 @@ But I started completely fresh and rewrote everything from scratch so that is wh
     - [x] Show JSON of game
     - [x] Set JSON data of game - easy sharing / modifying
       - [x] Start-Phase command
-      - [ ] Set game channel (the main chat channel)
+      - [x] Add game channels
       - [x] Add/Remove/List Mods to the game
-      - [ ] Set mafia channel
       - [ ] Assign Discord-Roles to Game-Alignments (eg Player, Mafia, Mason...)
+      - [ ] Require one alive_player role
     - [x] Phase-Checking
-    - [ ] Menu using the core extension WIP
+    - [x] Menu using the core extension WIP
   - Functions for during the game:
-    - [ ] Votes
-      - [ ] Vote + Majority + Lynch + Channel-locking
-      - [ ] Votecount
-      - [ ] Day/Night timer + Channel-locking
-      - [ ] Timeleft
-      - [ ] Message Edits
+    - [x] Votes
+      - [x] Vote + Majority + Lynch + Channel-locking
+      - [x] Votecount
+      - [x] Day/Night timer + Channel-locking
+      - [x] Timeleft
+      - [x] Message edits watching
+    - [x] Command for replacing a player - also replaces votes
     - Prodtimers-Tracking:
-      - [ ] Command for listing all prodtimers for mods
+      - [x] Command for listing all prodtimers
       - [ ] Command for setting the prodtimer of someone to x
-      - [ ] Message to mods on time up
-      - [ ] Rresetting timers on daystarts and message sent
-      - [ ] Tracking of PlayerRole to add/remove Prodtimers on player replacements
+      - [x] Message to mods on time up
+      - [x] Rresetting timers on daystarts and message sent
   - Personal Ideas / random thoughts:
     - [ ] Game-Pause/Resume Command
     - [ ] Preposting of daystart message - if done the bot will automatically send it out and start the day when the time is up ~ How to handle wills tho? If they would be updated till then... or someone changes their nightaction...
@@ -149,13 +145,27 @@ But I started completely fresh and rewrote everything from scratch so that is wh
   - [ ] Make a TODO list
 - **Moderation:**
   - [ ] Make a TODO list
+- **Fun**
+  - [ ] Roll dices
+  - [ ] Create meme
+  - [ ]
 - **Utilities:**
   - **Commands:**
+    - [x] Reminders
+        - [x] Add reminder
+        - [x] Remove reminder
+        - [x] Bot sends you msg when time is up
+        - [x] Show GMT dates for all reminders when they will be fired
     - [ ] Timezones
       - [x] Register own timezone
       - [x] Show time for other people
       - [x] Show time difference
       - [ ] Convert times
+    - [x] Logging
+        - [x] Be able to log channels
+        - [x] Let the bot msg you the file
+        - [x] Fancyness of Markdown (embed support, images, etc)
+        - [x] Make it smart so it only downloads the latest not yet loaded messages
   - **Pure Utility for other Modules:**
     - [ ] Menu-Extension:
       - [x] Emoji-Reaction control
@@ -167,5 +177,5 @@ But I started completely fresh and rewrote everything from scratch so that is wh
       - [x] Go up menu page (+ to specific one)
       - [x] Chainable functions for easier usage
       - [ ] Add customizable timeout function
-    - [ ] Send multiple messages without killing formating
+    - [ ] Send multiple messages without killing formating (markdown)
     - [ ] ...

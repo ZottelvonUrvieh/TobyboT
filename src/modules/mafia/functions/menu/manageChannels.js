@@ -17,8 +17,10 @@ module.exports = {
             );
 
         for (let i = 0; i < game.settings.channels.length; i++) {
-            let channel = cmd.bot.guilds.find('id', game.settings.channels[i].guild).channels.get(game.settings.channels[i].channel);
-            menu.addOption(`${channel.name} on ${channel.guild.name}`, `<#${channel.id}>ㅤ`, cmd.channels.mRemoveChannel, channel.id, msg, cmd, menu, game);
+            let guild = cmd.bot.guilds.find('id', game.settings.channels[i].guild);
+            if (typeof guild === 'undefined' || guild === null) continue;
+            let channel = guild.channels.get(game.settings.channels[i].channel);
+            menu.addOption(`"${channel.name}" on ${guild.name}`, `<#${channel.id}>ㅤ`, cmd.channels.mRemoveChannel, channel.id, msg, cmd, menu, game);
         }
         menu.update();
     },

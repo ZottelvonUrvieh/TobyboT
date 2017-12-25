@@ -1,3 +1,4 @@
+
 module.exports = {
     run: async function (message) {
         let menu = new this.bot.extensions.core.Menu(this, 6, true);

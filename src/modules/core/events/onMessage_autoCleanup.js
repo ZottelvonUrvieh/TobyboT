@@ -1,13 +1,19 @@
 function run(msg) {
+    /*
     if (msg.author.id === this.user.id && self.forceMode !== 2 && self.botMsgTime > 0)
         return msg.delete(self.botMsgTime);
-    if (msg.author.bot) return;
+    */
+    // if (msg.author.bot) return;
+    // if (self.bot.configs.owners.indexOf(msg.author.id) === -1) return;
+    // self.debug(msg.content);
+    /*
     let cmdMsgArgs = this.componentManager.parseMsgToCommand(msg);
     if (!cmdMsgArgs) return;
     if (self.forceMode === 1)
         return msg.delete(self.userCmdTime);
     if (self.forceMode === 0 && cmdMsgArgs.cmd.autoDelete && cmdMsgArgs.cmd.autoDelete > 0)
         return msg.delete(cmdMsgArgs.cmd.autoDelete);
+    */
 }
 
 

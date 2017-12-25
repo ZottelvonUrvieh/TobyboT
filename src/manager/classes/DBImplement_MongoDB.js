@@ -72,7 +72,7 @@ class MongoDBHandler extends DBInterface{
     async setTableRowByKey(table, key, row) {
         if (row === null) this.deleteTableRowsByKey(table, key);
         let tab = this.getTable(table);
-        return tab.findOneAndUpdate(key, row, { upsert: true }, function (err, ) {
+        return tab.findOneAndUpdate(key, row, { upsert: true }, function (err, doc) {
             if (err) return this.error(err.stack);
         }.bind(this));
     }

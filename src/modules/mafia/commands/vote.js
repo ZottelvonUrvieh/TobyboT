@@ -3,14 +3,16 @@ module.exports = {
     run: async function (msg, args) {
         // TODO: Only let it work on people that are in the same game that you are voting in!
         let games = await gameHelper.getGamesFromContext(this, msg);
-        if (!games || games.length === 0) return new Error('No game-context found to apply the vote...\nAre you even someone who is allowed to vote in an actively running game?');
+        if (!games || games.length === 0) return new Error('No game-context found to apply the vote...\nVotes have to be casted in the main game channel!');
         // TODO: Implement handling on which game to prioritize if ambitious
         if (games.length > 1) return new Error('Ambitious... it is not clear for which game you want to vote... the bot-dev needs to do something to handle that!');
-        if (msg.mentions.users.length === 0) return new Error('You have to mention someone in the vote command!');
-
-        let victim = msg.mentions.users.first();
         let game = games[0];
-        let c_votes = game.current.votes;
+        let voter = game.current.players_alive.find(player => player.id === msg.author.id);
+        if (typeof voter === 'undefined') return new Error('Only active and actually alive players are allowed to cast a vote.');
+        if (msg.mentions.users.length === 0) return new Error('You have to mention a player in the vote command! ~~Unvoting will be implemented soon :)~~');
+        let victim = game.current.players_alive.find(player => player.id === msg.mentions.users.first().id);
+        if (typeof victim === 'undefined') return new Error('You can not vote for people that are not alive players...');
+        let c_votes = game.current.votes || [];
         // Removing all eventual previous vote(s)
         for (let vote of c_votes) {
             for (let voter of vote.voters) {
@@ -31,15 +33,18 @@ module.exports = {
         // Add Person to vote table if not already voted
         if (is_voted === false) {
             c_votes.push({
-                name: victim.username,
+                name: victim.name,
                 id: victim.id,
-                voters: [{ name: msg.author.username, id: msg.author.id }]
+                voters: [{ name: voter.name, id: voter.id, vote_power: voter.vote_power }]
             });
         }
         // Else add vote to the other ones
         else {
             let index = c_votes.findIndex(vote => vote.id === victim.id);
-            c_votes[index].voters.push({ name: msg.author.username, id: msg.author.id });
+            c_votes[index].voters.push({
+                name: voter.name, id: voter.id,
+                vote_power: voter.vote_power
+            });
         }
         // Update the game with the correct votes
         game.current.votes = c_votes;
@@ -51,7 +56,7 @@ module.exports = {
         // Send new vote count table to channel
         gameHelper.sendVoteCount(msg, game);
         for (let vote of c_votes) {
-            if (vote.voters.length >= game.current.majority) {
+            if (vote.voters.reduce((sum, voter) => sum + voter.vote_power, 0) >= game.current.majority) {
                 require('../functions/startPhase').startPhase(game, this, []);
             }
         }
@@ -73,7 +78,7 @@ module.exports = {
         this.description = 'Allows you to vote for someone in a running mafia-game.';
         // Gets shown in specific help and depending on setting (one below) if a command throws an error
         this.usage = function () {
-            return `To vote do: \`${this.bot.configs.prefix}${this.cmd} @someone` +
+            return `To vote do: \`${this.bot.configs.prefix}${this.cmd} @someone\`\n` +
                    'You can also put in more text. Simply the first mention is taken as on whom you want to vote on.';
         };
         // Makes the bot message how to use the command correctly if you return an error

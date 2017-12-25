@@ -4,9 +4,9 @@ module.exports = {
         let emb = new Discord.RichEmbed();
         emb.setTitle(':ballot_box: __** Current Votes **__:ballot_box:');
         game.current.votes.forEach(vote => {
-            let field_name = `\n__**Voting ${vote.name} (${vote.voters.length}):**__`;
+            let field_name = `\n**Voting ${vote.name} (${vote.voters.reduce((sum, voter) => sum + voter.vote_power, 0)}/${game.current.majority}):**`;
             let field_value = '';
-            vote.voters.forEach(voter => field_value += `\n${voter.name}`);
+            vote.voters.forEach(voter => field_value += `\n${voter.name} x ${voter.vote_power}`);
             emb.addField(field_name || 'ㅤ', field_value || 'ㅤ');
         });
         emb.setFooter(`Current Majority: ${game.current.majority}`);
@@ -21,7 +21,7 @@ module.exports = {
             games = await component.bot.dbManager.getTableRowsByKey(component.mod.mafiaDBTable, { owner_id: msg.author.id, selected: true });
         if (!games || games.length === 0) {
             let er = new Error('Was unable to find any game to apply the command to... no game in this channel and no own selected game...');
-            msg.channel.send(er.message);
+            // msg.channel.send(er.message);
             return null;
         }
         return games;
